@@ -1,3 +1,122 @@
+<script setup>
+    import {ref, onMounted, computed} from "vue";
+    import {useRoute, useRouter} from "vue-router";
+    import {cart, removeFromCart, incrementQuantity, showAlert, decrementQuantity, uniqueProductsCount, showModal, modalProduct, alertMessage, updateCartProduct} from "~/services/cart";
+    import {sendQuotationRequest} from "~/services/quotation";
+    import {showMenu} from "@/services/menuService";
+    import {getUserId, getToken} from "@/services/auth";
+
+    const showQuoteModal = ref(false);
+    const numberOfSuppliers = ref(3);
+
+    const toggleMenu = () => {
+        showMenu.value = !showMenu.value;
+    };
+
+    const toggleQuoteModal = () => {
+        showQuoteModal.value = !showQuoteModal.value;
+    };
+
+    const closeModal = () => {
+        showModal.value = false;
+    };
+
+    const closeAllModals = () => {
+        showModal.value = false;
+        showQuoteModal.value = false;
+    };
+
+    const showAlertMessage = (message) => {
+        alertMessage.value = message;
+        showAlert.value = true;
+        setTimeout(() => {
+            showAlert.value = false;
+        }, 3000);
+    };
+
+    const userId = ref(getUserId());
+    const userRole = ref(null);
+    const layout = ref("default");
+
+    const loadUserData = () => {
+        if (userId.value) {
+            const userData = JSON.parse(localStorage.getItem("userData")) || {};
+            userRole.value = userData.role || null;
+
+            if (userRole.value === "supplier") {
+                layout.value = "supplier";
+            } else if (userRole.value === "superadmin") {
+                layout.value = "admin";
+            } else {
+                layout.value = "default";
+            }
+        } else {
+            console.error("User ID not found");
+        }
+    };
+
+    onMounted(() => {
+        loadUserData();
+        console.log("user: ", userId.value);
+    });
+
+    const router = useRouter();
+    const handleSendQuotationRequest = async () => {
+        const quotation = {
+            userId: userId.value,
+            name: "Cotización",
+            type: "regular",
+            price: "20",
+            status: "pending",
+            quotationCount: numberOfSuppliers.value,
+        };
+        const result = await sendQuotationRequest(quotation, cart.value);
+
+        if (result.success) {
+            closeAllModals();
+            showMenu.value = false;
+            const id = result.data;
+            router.push(`/cotizaciones/${id}`);
+        } else {
+            showAlertMessage(result.message);
+        }
+    };
+
+    const sendCartToBackend = async () => {
+        try {
+            const products = cart.value.map((item) => ({
+                productId: item.id,
+                price: item.price,
+                unitOfMeasure: item.unitOfMeasure,
+            }));
+
+            console.table(products);
+
+            const response = await fetch(`http://localhost:8000/api/theproducts/${userId.value}/`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${getToken()}`,
+                },
+                body: JSON.stringify({products}),
+            });
+
+            if (response.ok) {
+                showAlertMessage("Carrito enviado exitosamente");
+            } else {
+                const errorData = await response.json();
+                showAlertMessage(`Error al enviar el carrito: ${errorData.error || "Unknown error"}`);
+            }
+        } catch (error) {
+            console.error("Error sending cart to backend:", error);
+            showAlertMessage("Error al enviar el carrito");
+        }
+    };
+
+    const route = useRoute();
+    const authRoutes = ["ingresar", "registrarse"];
+    const isAuthRoute = computed(() => authRoutes.includes(route.name));
+</script>
 <template>
     <div class="min-h-screen bg-gray-100" v-if="!isAuthRoute">
         <NuxtLayout :name="layout" :showMenu="showMenu" @toggle-menu="toggleMenu">
@@ -63,137 +182,3 @@
     <!-- Mostrar solo la página para rutas de autenticación -->
     <NuxtPage v-else />
 </template>
-
-<script setup>
-    import {ref, onMounted, computed} from "vue";
-    import {useRoute, useRouter} from "vue-router";
-    import {cart, removeFromCart, incrementQuantity, showAlert, decrementQuantity, uniqueProductsCount, showModal, modalProduct, alertMessage, updateCartProduct} from "~/services/cart";
-    import {sendQuotationRequest} from "~/services/quotation";
-    import {showMenu} from "@/services/menuService";
-
-    // const showMenu = ref(false);
-    const showQuoteModal = ref(false);
-    const numberOfSuppliers = ref(3);
-
-    const toggleMenu = () => {
-        showMenu.value = !showMenu.value;
-    };
-
-    const toggleQuoteModal = () => {
-        showQuoteModal.value = !showQuoteModal.value;
-    };
-
-    const closeModal = () => {
-        showModal.value = false;
-    };
-
-    const closeAllModals = () => {
-        showModal.value = false;
-        showQuoteModal.value = false;
-    };
-
-    const showAlertMessage = (message) => {
-        alertMessage.value = message;
-        showAlert.value = true;
-        setTimeout(() => {
-            showAlert.value = false;
-        }, 3000);
-    };
-
-    const isLocalStorageAvailable = () => {
-        try {
-            const test = "__localStorageTest__";
-            localStorage.setItem(test, test);
-            localStorage.removeItem(test);
-            return true;
-        } catch (e) {
-            return false;
-        }
-    };
-
-    const userId = ref(null);
-    const userRole = ref(null);
-    const layout = ref("default");
-
-    const loadUserData = () => {
-        if (isLocalStorageAvailable()) {
-            const userData = JSON.parse(localStorage.getItem("userData")) || {};
-            userId.value = userData.id;
-            userRole.value = userData.role || null;
-
-            // Asignar layout según el role
-            if (userRole.value === "supplier") {
-                layout.value = "supplier";
-            } else if (userRole.value === "superadmin") {
-                layout.value = "admin";
-            } else {
-                layout.value = "default";
-            }
-        }
-    };
-
-    onMounted(() => {
-        loadUserData();
-        console.log("user: ", userId.value);
-    });
-
-    const router = useRouter();
-    const handleSendQuotationRequest = async () => {
-        const quotation = {
-            userId: userId.value,
-            name: "Cotización",
-            type: "regular",
-            price: "20",
-            status: "pending",
-            quotationCount: numberOfSuppliers.value,
-        };
-        const result = await sendQuotationRequest(quotation, cart.value);
-
-        if (result.success) {
-            closeAllModals();
-            showMenu.value = false;
-            const id = result.data;
-            router.push(`/cotizaciones/${id}`);
-        } else {
-            showAlertMessage(result.message);
-        }
-    };
-
-    const sendCartToBackend = async () => {
-        try {
-            const products = cart.value.map((item) => ({
-                productId: item.id,
-                price: item.price,
-                unitOfMeasure: item.unitOfMeasure,
-            }));
-
-            console.table(products);
-
-            const response = await fetch(`http://localhost:8000/api/theproducts/${userId.value}/`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({products}), // Enviar como objeto con clave "products"
-            });
-
-            if (response.ok) {
-                showAlertMessage("Carrito enviado exitosamente");
-            } else {
-                const errorData = await response.json();
-                showAlertMessage(`Error al enviar el carrito: ${errorData.error || "Unknown error"}`);
-            }
-        } catch (error) {
-            console.error("Error sending cart to backend:", error);
-            showAlertMessage("Error al enviar el carrito");
-        }
-    };
-    // Detectar si la ruta actual es de autenticación
-    const route = useRoute();
-    const authRoutes = ["ingresar", "registrarse"];
-    const isAuthRoute = computed(() => authRoutes.includes(route.name));
-</script>
-
-<style scoped>
-    /* Agrega tus estilos aquí si es necesario */
-</style>

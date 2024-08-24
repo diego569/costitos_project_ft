@@ -3,6 +3,7 @@
     import {useRouter} from "vue-router";
     import {Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems} from "@headlessui/vue";
     import {Bars3Icon, BellIcon, XMarkIcon, UserIcon, ShoppingCartIcon, RectangleGroupIcon, UserGroupIcon} from "@heroicons/vue/24/outline";
+    import {getUserId, getUserName, getToken, logout} from "@/services/auth"; // Importar la función logout
 
     const props = defineProps({
         showMenu: Boolean,
@@ -10,7 +11,10 @@
 
     const emit = defineEmits(["toggle-menu"]);
 
-    const user = ref(null);
+    const user = ref({
+        id: getUserId(),
+        name: getUserName(),
+    });
     const quotationCount = ref(null);
     const router = useRouter();
 
@@ -19,44 +23,20 @@
         router.push({name: "ingresar"});
     };
 
-    const logout = async () => {
-        try {
-            const response = await fetch("http://localhost:8000/api/auth/salir/logout", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error("Error al cerrar sesión");
-            }
-
-            localStorage.clear();
-
-            router.push({name: "index"}).then(() => {
-                window.location.reload();
-            });
-        } catch (error) {
-            console.error("Error al cerrar sesión:", error);
-        }
-    };
-
-    const isLocalStorageAvailable = () => {
-        try {
-            const test = "__localStorageTest__";
-            localStorage.setItem(test, test);
-            localStorage.removeItem(test);
-            return true;
-        } catch (e) {
-            return false;
-        }
+    const handleLogout = () => {
+        logout(router);
     };
 
     const fetchQuotationCount = async () => {
         try {
-            if (user.value && user.value.id) {
-                const response = await fetch(`http://localhost:8000/api/user/cotizaciones/${user.value.id}/quotationcount`);
+            if (user.value.id) {
+                const response = await fetch(`http://localhost:8000/api/user/cotizaciones/${user.value.id}/quotationcount`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${getToken()}`,
+                    },
+                });
                 if (!response.ok) {
                     throw new Error("Error al obtener cotizaciones");
                 }
@@ -69,13 +49,7 @@
     };
 
     onMounted(() => {
-        if (isLocalStorageAvailable()) {
-            const storedUser = localStorage.getItem("userData");
-            if (storedUser) {
-                user.value = JSON.parse(storedUser);
-                fetchQuotationCount(); // Llamar a la función para obtener la quotationCount después de establecer el usuario
-            }
-        }
+        fetchQuotationCount();
     });
 
     const navigation = [
@@ -85,7 +59,6 @@
 </script>
 
 <template>
-    <!-- <AppHeader /> -->
     <Disclosure as="nav" class="sticky top-0 z-50 block w-full min-w-[360px] bg-white shadow-sm">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="relative flex h-[60px] items-center justify-between">
@@ -109,25 +82,28 @@
                     </div>
                 </div>
                 <div class="absolute inset-y-0 right-0 flex items-center gap-3 sm:static sm:inset-auto sm:pr-0">
+                    <div v-if="user.id" class="hidden items-center sm:flex">
+                        <div class="pr-3 text-xs text-gray-800">
+                            <p>
+                                Cotizaciones: <span class="font-semibold"> {{ quotationCount }} </span>
+                            </p>
+                            <NuxtLink to="/precios" class="text-blue-400 transition-all duration-200 hover:text-blue-700">Obtener más</NuxtLink>
+                        </div>
+                    </div>
                     <button type="button" class="relative rounded-md bg-gray-100 p-1.5 text-gray-600 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-100" @click="$emit('toggle-menu')">
-                        <span class="sr-only">View notifications</span>
+                        <span class="sr-only">Carrito</span>
                         <ShoppingCartIcon class="h-6 w-6 text-gray-500" />
                     </button>
 
                     <!-- Profile dropdown -->
                     <Menu as="div" class="relative">
-                        <div v-if="!user">
+                        <div v-if="!user.id">
                             <button @click="navigateToLogin" class="relative inline-flex items-center rounded-md bg-gray-100 px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-200 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-gray-500">Ingresar</button>
                         </div>
                         <div v-else class="flex items-center">
-                            <div class="pr-3 text-xs">
-                                <p>Cotizaciones restantes: {{ quotationCount }}</p>
-                                <a href="#">Obtener mas</a>
-                            </div>
                             <MenuButton class="relative flex items-center rounded-md bg-gray-100 px-3 py-1.5 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-100">
                                 <span class="sr-only">Open user menu</span>
                                 <UserIcon class="h-6 w-6 text-gray-500" />
-
                                 <span class="ml-2 hidden md:block">{{ user?.name }}</span>
                             </MenuButton>
                         </div>
@@ -140,13 +116,13 @@
                             leave-to-class="transform opacity-0 scale-95">
                             <MenuItems class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                                 <MenuItem v-slot="{active}">
-                                    <a href="#" :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']"> Your Profile </a>
+                                    <a href="/cotizaciones" :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']"> Mis cotizaciones </a>
                                 </MenuItem>
                                 <MenuItem v-slot="{active}">
-                                    <a href="/cotizaciones" :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']"> Cotizaciones </a>
+                                    <a href="#" :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']"> Mi perfil </a>
                                 </MenuItem>
                                 <MenuItem v-slot="{active}">
-                                    <a href="#" @click="logout" :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']"> Salir </a>
+                                    <a href="#" @click="handleLogout" :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']"> Salir </a>
                                 </MenuItem>
                             </MenuItems>
                         </transition>
@@ -181,6 +157,10 @@
                         </DisclosureButton>
                     </div>
                     <div class="space-y-1 px-2 pb-3 pt-4">
+                        <div v-if="user" class="flex flex-col gap-2 text-gray-800">
+                            <p>Cotizaciones: {{ quotationCount }}</p>
+                            <NuxtLink to="/precios" class="text-blue-400 transition-all duration-200 hover:text-blue-700">Obtener más</NuxtLink>
+                        </div>
                         <DisclosureButton
                             v-for="item in navigation"
                             :key="item.name"

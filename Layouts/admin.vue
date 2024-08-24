@@ -1,54 +1,28 @@
 <script setup>
     import {ref, onMounted} from "vue";
-
+    import {useRouter} from "vue-router";
     import {BookOpenIcon, CogIcon, MagnifyingGlassIcon, ChevronDownIcon, ClipboardDocumentCheckIcon} from "@heroicons/vue/24/outline";
     import {Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems} from "@headlessui/vue";
     import {Bars3Icon, BellIcon, XMarkIcon, UserIcon, ShoppingCartIcon, RectangleGroupIcon, UserGroupIcon} from "@heroicons/vue/24/outline";
+    import {getUserId, getUserName, logout} from "@/services/auth"; // Importar la función logout
 
-    const user = ref(null);
+    const user = ref({
+        id: getUserId(),
+        name: getUserName(),
+    });
 
-    const logout = async () => {
-        try {
-            const response = await fetch("http://localhost:8000/api/auth/salir/logout", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
+    const router = useRouter();
 
-            if (!response.ok) {
-                throw new Error("Error al cerrar sesión");
-            }
-
-            user.value = null;
-            localStorage.removeItem("token");
-            localStorage.removeItem("userData");
-
-            router.push({name: "ingresar"});
-        } catch (error) {
-            console.error("Error al cerrar sesión:", error);
-        }
-    };
-
-    const isLocalStorageAvailable = () => {
-        try {
-            const test = "__localStorageTest__";
-            localStorage.setItem(test, test);
-            localStorage.removeItem(test);
-            return true;
-        } catch (e) {
-            return false;
-        }
+    const handleLogout = () => {
+        logout(router); // Usar la función logout desde auth.js
     };
 
     onMounted(() => {
-        if (isLocalStorageAvailable()) {
-            const storedUser = localStorage.getItem("userData");
-            if (storedUser) {
-                user.value = JSON.parse(storedUser);
-            }
+        if (user.value.id) {
+            console.log(`Usuario: ${user.value.name} con ID: ${user.value.id}`);
         }
     });
+
     const menuItems = {
         Catalogo: [
             {name: "Catálogo general", icon: BookOpenIcon, link: "/admin/catalogo"},
@@ -140,7 +114,7 @@
                                         <a href="#" :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']"> Configuracion </a>
                                     </MenuItem>
                                     <MenuItem v-slot="{active}">
-                                        <a href="#" @click="logout" :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']"> Salir </a>
+                                        <a href="#" @click="handleLogout" :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']"> Salir </a>
                                     </MenuItem>
                                 </MenuItems>
                             </transition>

@@ -3,6 +3,7 @@
     import {useRouter} from "vue-router";
     import {Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems} from "@headlessui/vue";
     import {Bars3Icon, BellIcon, XMarkIcon, UserIcon, ShoppingCartIcon, RectangleGroupIcon, UserGroupIcon} from "@heroicons/vue/24/outline";
+    import {getUserId, getUserName, logout} from "@/services/auth"; // Importar las funciones necesarias
 
     const props = defineProps({
         showMenu: Boolean,
@@ -10,7 +11,10 @@
 
     const emit = defineEmits(["toggle-menu"]);
 
-    const user = ref(null);
+    const user = ref({
+        id: getUserId(),
+        name: getUserName(),
+    });
     const router = useRouter();
 
     const navigateToLogin = () => {
@@ -18,48 +22,9 @@
         router.push({name: "ingresar"});
     };
 
-    const logout = async () => {
-        try {
-            const response = await fetch("http://localhost:8000/api/auth/salir/logout", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error("Error al cerrar sesión");
-            }
-
-            user.value = null;
-            localStorage.removeItem("token");
-            localStorage.removeItem("userData");
-
-            router.push({name: "ingresar"});
-        } catch (error) {
-            console.error("Error al cerrar sesión:", error);
-        }
+    const handleLogout = () => {
+        logout(router);
     };
-
-    const isLocalStorageAvailable = () => {
-        try {
-            const test = "__localStorageTest__";
-            localStorage.setItem(test, test);
-            localStorage.removeItem(test);
-            return true;
-        } catch (e) {
-            return false;
-        }
-    };
-
-    onMounted(() => {
-        if (isLocalStorageAvailable()) {
-            const storedUser = localStorage.getItem("userData");
-            if (storedUser) {
-                user.value = JSON.parse(storedUser);
-            }
-        }
-    });
 
     const navigation = [
         {name: "Explorar", href: "/explorar", icon: RectangleGroupIcon},
@@ -68,7 +33,6 @@
 </script>
 
 <template>
-    <!-- <AppHeader /> -->
     <Disclosure as="nav" class="sticky top-0 z-10 block w-full min-w-[360px] bg-white shadow-sm">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="relative flex h-[60px] items-center justify-between">
@@ -99,7 +63,7 @@
 
                     <!-- Profile dropdown -->
                     <Menu as="div" class="relative">
-                        <div v-if="!user">
+                        <div v-if="!user.id">
                             <button @click="navigateToLogin" class="relative inline-flex items-center rounded-md bg-gray-100 px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-200 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-gray-500">Ingresar</button>
                         </div>
                         <div v-else>
@@ -118,19 +82,16 @@
                             leave-to-class="transform opacity-0 scale-95">
                             <MenuItems class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                                 <MenuItem v-slot="{active}">
-                                    <a href="#" :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']"> Your Profile </a>
+                                    <a href="#" :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']"> Mi perfil </a>
                                 </MenuItem>
+
                                 <MenuItem v-slot="{active}">
-                                    <a href="/cotizaciones" :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']"> Cotizaciones </a>
-                                </MenuItem>
-                                <MenuItem v-slot="{active}">
-                                    <a href="#" @click="logout" :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']"> Salir </a>
+                                    <a href="#" @click="handleLogout" :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']"> Salir </a>
                                 </MenuItem>
                             </MenuItems>
                         </transition>
                     </Menu>
                     <div class="sm:hidden">
-                        <!-- Mobile menu button-->
                         <DisclosureButton class="relative inline-flex items-center justify-center rounded-md p-2 text-gray-600 hover:bg-gray-200 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-gray-500">
                             <span class="absolute -inset-0.5" />
                             <span class="sr-only">Open main menu</span>
@@ -175,6 +136,4 @@
         </DisclosurePanel>
     </Disclosure>
     <slot />
-
-    <!-- <AppFooter /> -->
 </template>

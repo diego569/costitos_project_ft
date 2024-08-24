@@ -1,18 +1,25 @@
 <script setup>
     import {ref, onMounted, computed} from "vue";
     import {useRoute} from "vue-router";
+    import {getToken, getCart, isLocalStorageAvailable} from "@/services/auth";
 
     const route = useRoute();
     const quotation = ref(null);
+    const quotationName = ref("");
 
     const fetchQuotationById = async (quotationId) => {
         try {
-            const response = await fetch(`http://localhost:8000/api/user/cotizaciones/quotationdatails/${quotationId}`);
+            const response = await fetch(`http://localhost:8000/api/user/cotizaciones/quotationdatails/${quotationId}`, {
+                headers: {
+                    Authorization: `Bearer ${getToken()}`,
+                },
+            });
             if (!response.ok) {
                 throw new Error("Failed to fetch quotation");
             }
             const data = await response.json();
             quotation.value = data.data;
+            quotationName.value = data.name;
         } catch (err) {
             console.error("Error fetching quotation:", err);
         }
@@ -21,7 +28,6 @@
     onMounted(() => {
         const quotationId = route.params.id;
         fetchQuotationById(quotationId);
-        // addProductsToQuotation(quotationId);
     });
 
     const uniqueSuppliers = computed(() => {
@@ -66,102 +72,63 @@
         return Math.min(...prices);
     };
 
-    // -----
-    const cart = ref([]);
-    const isLocalStorageAvailable = () => {
+    const cart = ref(getCart()); // Obtener el carrito usando la función de auth.js
+
+    const newQuotationName = ref("");
+    const isModalOpen = ref(false);
+
+    const openModal = () => {
+        newQuotationName.value = quotationName.value;
+        isModalOpen.value = true;
+    };
+
+    const closeModal = () => {
+        isModalOpen.value = false;
+    };
+
+    const updateQuotationName = async () => {
+        const quotationId = route.params.id;
+
         try {
-            const test = "__localStorageTest__";
-            localStorage.setItem(test, test);
-            localStorage.removeItem(test);
-            return true;
-        } catch (e) {
-            return false;
+            const response = await fetch(`http://localhost:8000/api/user/cotizaciones/quotationdatails/${quotationId}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${getToken()}`,
+                },
+                body: JSON.stringify({name: newQuotationName.value}),
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to update quotation name");
+            }
+
+            quotationName.value = newQuotationName.value;
+            closeModal();
+        } catch (err) {
+            console.error("Error updating quotation name:", err);
         }
     };
-
-    if (isLocalStorageAvailable()) {
-        cart.value = JSON.parse(localStorage.getItem("cart")) || [];
-    }
-    const getToken = () => {
-        if (isLocalStorageAvailable()) {
-            return localStorage.getItem("token");
-        }
-        return null;
-    };
-
-    // const addProductsToQuotation = async (quotationId, cart) => {
-    //     try {
-    //         const token = getToken();
-    //         if (!token) {
-    //             throw new Error("No token found");
-    //         }
-
-    //         const products = cart.map((item) => ({
-    //             productId: item.id,
-    //             quantity: item.quantity,
-    //         }));
-
-    //         const response = await fetch(`http://localhost:8000/api/quotations/${quotationId}/`, {
-    //             method: "POST",
-    //             headers: {
-    //                 Authorization: `Bearer ${token}`,
-    //                 "Content-Type": "application/json",
-    //             },
-    //             body: JSON.stringify({products}),
-    //         });
-
-    //         if (!response.ok) {
-    //             throw new Error("Error al agregar productos a la cotización");
-    //         }
-
-    //         const data = await response.json();
-    //         console.log("Productos agregados a la cotización:", data);
-    //         console.table(data);
-    //         const qpIds = data.qpId;
-
-    //         const pricesResponse = await fetch(`http://localhost:8000/api/quotation/products/prices`, {
-    //             method: "POST",
-    //             headers: {
-    //                 "Content-Type": "application/json",
-    //             },
-    //             body: JSON.stringify({qpIds}),
-    //         });
-
-    //         if (!pricesResponse.ok) {
-    //             throw new Error("Error al obtener precios de los proveedores");
-    //         }
-
-    //         const pricesData = await pricesResponse.json();
-    //         console.log("Precios de los proveedores:", pricesData);
-    //         console.table(pricesData);
-
-    //         const supplierProductsResponse = await fetch("http://localhost:8000/api/quotation3/supplier-products", {
-    //             method: "POST",
-    //             headers: {
-    //                 "Content-Type": "application/json",
-    //             },
-    //             body: JSON.stringify(pricesData), // Asegúrate de que pricesData es la variable que contiene tu array de productos
-    //         });
-
-    //         if (supplierProductsResponse.ok) {
-    //             const responseData = await supplierProductsResponse.json();
-    //             console.log("Productos creados:", responseData);
-    //         } else {
-    //             console.error("Error al crear productos:", supplierProductsResponse.statusText);
-    //         }
-
-    //         console.log("Productos y precios de los proveedores agregados a la cotización con éxito");
-
-    //         showAlertMessage("Productos y precios de los proveedores agregados a la cotización con éxito");
-    //     } catch (error) {
-    //         console.error("Error al agregar productos a la cotización:", error);
-    //         showAlertMessage("Error al agregar productos a la cotización");
-    //     }
-    // };
 </script>
 <template>
     <div class=" ">
-        <h2 class="mb-4 text-xl font-bold">Cotizar</h2>
+        <div>
+            <h2 class="mb-4 text-xl font-bold">
+                {{ quotationName }}
+                <button @click="openModal" class="ml-4 text-sm text-blue-500 hover:underline">Editar</button>
+            </h2>
+
+            <div v-if="isModalOpen" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                <div class="rounded-md bg-white p-6">
+                    <h3 class="mb-4 text-lg font-semibold">Editar Nombre de Cotización</h3>
+                    <input v-model="newQuotationName" type="text" class="mb-4 w-full border p-2" placeholder="Nuevo nombre de cotización" />
+                    <div class="flex justify-end">
+                        <button @click="closeModal" class="mr-2 rounded-md bg-gray-300 px-4 py-2">Cancelar</button>
+                        <button @click="updateQuotationName" class="rounded-md bg-blue-500 px-4 py-2 text-white">Guardar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <table v-if="quotation" class="min-w-full">
             <thead class=" ">
                 <tr class="bg-white">
