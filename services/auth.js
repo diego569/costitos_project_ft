@@ -67,7 +67,7 @@ export const fetchWithAuth = async (url, method, body) => {
             method,
             headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${getToken()}`, // Usa el token desde auth.js
+                Authorization: `Bearer ${getToken()}`,
             },
             body: JSON.stringify(body),
         });

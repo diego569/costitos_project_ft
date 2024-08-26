@@ -1,71 +1,83 @@
 <template>
-    <div class="flex flex-col gap-3 text-center">
-        <div class=" ">
-            <div @drop.prevent="handleDrop" @dragover.prevent="handleDragOver" :class="{'flex h-40 items-center justify-center border-2 border-dashed border-gray-300 p-3': !file, 'border-none': file}">
-                <div v-if="!file" class="flex flex-col items-center">
-                    <button @click="triggerFileInput" type="button" class="w-full rounded-lg bg-primary-600 px-4 py-2 font-semibold text-white shadow-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">Cargar imagen</button>
-                    <p class="text-gray-600">O arrastre y suelte el archivo aquí</p>
-                </div>
-                <div v-if="file" class="relative">
-                    <img :src="preview" alt="Image Preview" class="h-auto w-full rounded-lg shadow-md" />
-                    <button @click="removeImage" type="button" class="absolute left-2 top-2 rounded-full bg-red-600 p-2 text-white shadow-md hover:bg-red-500 focus:outline-none">X</button>
-                    <button @click="changeImage" type="button" class="absolute right-2 top-2 rounded-full bg-gray-800 p-2 text-white shadow-md hover:bg-gray-700 focus:outline-none">Cambiar imagen</button>
-                </div>
+    <div class="mb-4">
+        <Label forId="" text="Imagen del Producto:" />
+        <div
+            @drop.prevent="handleDrop"
+            @dragover.prevent="handleDragOver"
+            @click="triggerFileInput"
+            :class="{
+                'flex h-40 cursor-pointer items-center justify-center rounded-md border-2 border-dashed border-gray-300 bg-gray-200/20 p-6 hover:bg-gray-100': !file,
+                'cursor-pointer rounded-md border-2 border-solid p-0': file,
+            }">
+            <div v-if="!file" class="flex flex-col items-center text-center">
+                <p class="mt-2 text-sm font-semibold text-gray-600">Haz clic para subir o arrastra y suelta</p>
+                <p class="text-xs text-gray-500">SVG, PNG, JPG o GIF (Formato cuadrado recomendable)</p>
             </div>
-            <input type="file" @change="handleFileChange" class="hidden" ref="fileInput" />
+            <div v-if="file" class="relative flex h-80 w-full items-center justify-center">
+                <img :src="preview" alt="Image Preview" class="max-h-full max-w-full rounded-lg object-contain shadow-md" />
+            </div>
         </div>
-        <div class=" ">
-            <label for="category-select" class="block text-left text-gray-700">Seleccione Categoría:</label>
-            <select v-model="selectedCategoryId" id="category-select" class="w-full rounded-lg border p-2" :disabled="!!props.categoryId">
+        <div v-if="file" class="mt-2 flex justify-center gap-4">
+            <button @click="removeImage" type="button" class="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-md hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-400">Quitar imagen</button>
+            <button @click="changeImage" type="button" class="rounded-lg bg-gray-800 px-4 py-2 text-sm font-semibold text-white shadow-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400">Cambiar imagen</button>
+        </div>
+        <input type="file" @change="handleFileChange" class="hidden" ref="fileInput" />
+    </div>
+    <div class="mb-4 grid gap-4 sm:grid-cols-2">
+        <div class="sm:col-span-2">
+            <Label forId="name" text="Nombre del producto:" />
+            <Input id="name" v-model="product.name" type="text" placeholder="Escribe el nombre del producto" required />
+        </div>
+
+        <div>
+            <Label forId="price" text="Precio:" />
+            <Input id="price" v-model="supplierProduct.price" type="number" placeholder="Escribe el precio" required />
+        </div>
+
+        <div>
+            <Label forId="unitOfMeasure" text="Unidad de medida:" />
+            <Input id="unitOfMeasure" v-model="supplierProduct.unitOfMeasure" type="text" placeholder="Unidad de medida" required />
+        </div>
+
+        <div>
+            <Label forId="category-select" text="Seleccione Categoría:" />
+            <select v-model="selectedCategoryId" id="category-select" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500">
                 <option v-for="category in categories" :key="category.id" :value="category.id">
                     {{ category.name }}
                 </option>
             </select>
         </div>
-        <div v-if="selectedCategoryId && subcategories.length > 0" class=" ">
-            <label for="subcategory-select" class="block text-left text-gray-700">Seleccione Subcategoría:</label>
-            <select v-model="selectedSubcategoryId" id="subcategory-select" class="w-full rounded-lg border p-2" :disabled="!!props.subcategoryId">
+
+        <div v-if="selectedCategoryId && subcategories.length > 0">
+            <Label forId="subcategory-select" text="Seleccione Subcategoría:" />
+            <select v-model="selectedSubcategoryId" id="subcategory-select" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500">
                 <option v-for="subcategory in subcategories" :key="subcategory.id" :value="subcategory.id">
                     {{ subcategory.name }}
                 </option>
             </select>
         </div>
-        <div class=" ">
-            <label for="name" class="block text-left text-gray-700">Nombre del producto:</label>
-            <input v-model="product.name" type="text" id="name" required class="w-full rounded-lg border p-2" />
-        </div>
-        <div class=" ">
-            <label for="description" class="block text-left text-gray-700">Descripción:</label>
-            <textarea v-model="product.description" id="description" required class="w-full rounded-lg border p-2"></textarea>
-        </div>
-        <div class="flex gap-3">
-            <div class="w-full">
-                <label for="price" class="block text-left text-gray-700">Precio:</label>
-                <input v-model="supplierProduct.price" type="number" id="price" required class="w-full rounded-lg border p-2" />
-            </div>
-            <div class="w-full">
-                <label for="unitOfMeasure" class="block text-left text-gray-700">Unidad de medida:</label>
-                <input v-model="supplierProduct.unitOfMeasure" type="text" id="unitOfMeasure" required class="w-full rounded-lg border p-2" />
-            </div>
-        </div>
-        <div class="flex justify-end gap-2">
-            <button type="button" class="inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-blue-900 hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2" @click="closeModal">Cancelar</button>
-            <button
-                type="button"
-                class="inline-flex justify-center rounded-md border border-transparent bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
-                @click="uploadImage">
-                Guardar
-            </button>
-        </div>
 
-        <p v-if="message" :class="{'text-green-500': isSuccess, 'text-red-500': !isSuccess}" class="mt-4">
-            {{ message }}
-        </p>
+        <div class="sm:col-span-2">
+            <Label forId="description" text="Descripción:" />
+            <textarea v-model="product.description" id="description" rows="4" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500" placeholder="Escribe la descripción del producto aquí"></textarea>
+        </div>
     </div>
+
+    <div class="mt-6 flex justify-end gap-2">
+        <button type="button" class="inline-flex justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2" @click="closeModal">Cancelar</button>
+        <button type="button" class="inline-flex justify-center rounded-lg border border-transparent bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2" @click="uploadImage">
+            Guardar
+        </button>
+    </div>
+
+    <p v-if="message" :class="{'text-green-500': isSuccess, 'text-red-500': !isSuccess}" class="mt-4">
+        {{ message }}
+    </p>
 </template>
 <script setup>
     import {ref, watch, onMounted} from "vue";
     import {v4 as uuidv4} from "uuid";
+    import {fetchWithAuth, getUserId} from "@/services/auth";
 
     const props = defineProps({
         categoryId: String,
@@ -86,7 +98,7 @@
     const preview = ref(null);
     const message = ref("");
     const isSuccess = ref(false);
-    const supplierId = "92c05463-e920-4153-bc38-5c6352701769";
+    const supplierId = getUserId();
 
     const categories = ref([]);
     const subcategories = ref([]);
@@ -95,34 +107,30 @@
 
     const fetchCategories = async () => {
         try {
-            const response = await fetch("http://localhost:8000/api/supplier/misproductos/getcategories");
-            if (!response.ok) throw new Error("Error al obtener categorías");
+            const response = await fetchWithAuth("http://localhost:8000/api/supplier/misproductos/getcategories", "GET");
 
-            const data = await response.json();
-            categories.value = data.data;
+            categories.value = response.data;
 
             if (!props.categoryId && categories.value.length > 0) {
                 selectedCategoryId.value = categories.value[0].id;
                 fetchSubcategories(selectedCategoryId.value);
             }
         } catch (error) {
-            console.error(error);
+            console.error("Error al obtener categorías", error);
         }
     };
 
     const fetchSubcategories = async (categoryId) => {
         try {
-            const response = await fetch(`http://localhost:8000/api/supplier/misproductos/getsubcategoriesbycategory/${categoryId}`);
-            if (!response.ok) throw new Error("Error al obtener subcategorías");
+            const response = await fetchWithAuth(`http://localhost:8000/api/supplier/misproductos/getsubcategoriesbycategory/${categoryId}`, "GET");
 
-            const data = await response.json();
-            subcategories.value = data.data;
+            subcategories.value = response.data;
 
             if (!props.subcategoryId && subcategories.value.length > 0) {
                 selectedSubcategoryId.value = subcategories.value[0].id;
             }
         } catch (error) {
-            console.error(error);
+            console.error("Error al obtener subcategorías", error);
         }
     };
 
