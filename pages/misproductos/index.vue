@@ -1,7 +1,6 @@
 <script setup>
     import {ref, onMounted} from "vue";
     import {fetchWithAuth, getUserId} from "@/services/auth";
-    import {TransitionRoot, TransitionChild, Dialog, DialogPanel, DialogTitle} from "@headlessui/vue";
 
     const supplierId = getUserId();
 
@@ -284,26 +283,6 @@
                 </div>
             </div>
         </Main>
-        <TransitionRoot appear :show="showModal" as="template">
-            <Dialog as="div" @close="closeModal" class="relative z-10">
-                <TransitionChild as="template" enter="duration-300 ease-out" enter-from="opacity-0" enter-to="opacity-100" leave="duration-200 ease-in" leave-from="opacity-100" leave-to="opacity-0">
-                    <div class="fixed inset-0 bg-black/25" />
-                </TransitionChild>
-
-                <div class="fixed inset-0 overflow-y-auto">
-                    <div class="flex min-h-full items-center justify-center p-4 text-center">
-                        <TransitionChild as="template" enter="duration-300 ease-out" enter-from="opacity-0 scale-95" enter-to="opacity-100 scale-100" leave="duration-200 ease-in" leave-from="opacity-100 scale-100" leave-to="opacity-0 scale-95">
-                            <DialogPanel class="w-full max-w-3xl transform overflow-hidden rounded-lg bg-white p-6 text-left align-middle shadow-xl transition-all">
-                                <DialogTitle as="h3" class="mb-4 text-lg font-medium leading-6 text-gray-900"> Agregar nuevo producto </DialogTitle>
-                                <hr class="mb-4" />
-                                <div class="mt-2">
-                                    <SupplierCreateProduct :categoryId="selectedCategory" :subcategoryId="selectedSubcategory" :closeModal="closeModal" />
-                                </div>
-                            </DialogPanel>
-                        </TransitionChild>
-                    </div>
-                </div>
-            </Dialog>
-        </TransitionRoot>
+        <SupplierCreateProduct :showModal="showModal" :closeModal="closeModal" :categoryId="selectedCategory" :subcategoryId="selectedSubcategory" />
     </template>
 </template>
