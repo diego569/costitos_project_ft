@@ -163,6 +163,9 @@
     });
 
     const showModal = ref(false);
+    const isNotificationVisible = ref(false);
+    const notificationMessage = ref("");
+    const notificationType = ref("");
 
     const openModal = () => {
         showModal.value = true;
@@ -170,6 +173,26 @@
 
     const closeModal = () => {
         showModal.value = false;
+    };
+
+    const handleNotification = ({message, type}) => {
+        notificationMessage.value = message;
+        notificationType.value = type;
+        isNotificationVisible.value = true;
+
+        setTimeout(() => {
+            isNotificationVisible.value = false;
+        }, 3000);
+    };
+
+    const updateProductList = () => {
+        if (selectedSubcategory.value) {
+            fetchProductsBySupplierAndSubcategory(selectedSubcategory.value);
+        } else if (selectedCategory.value) {
+            fetchProductsBySupplierAndCategory(selectedCategory.value);
+        } else {
+            fetchProductsBySupplier();
+        }
     };
 </script>
 <template>
@@ -283,6 +306,11 @@
                 </div>
             </div>
         </Main>
-        <SupplierCreateProduct :showModal="showModal" :closeModal="closeModal" :categoryId="selectedCategory" :subcategoryId="selectedSubcategory" />
+
+        <SupplierCreateProduct :showModal="showModal" :closeModal="closeModal" :categoryId="selectedCategory" :subcategoryId="selectedSubcategory" @notify="handleNotification" @productAdded="updateProductList" />
+
+        <div v-if="isNotificationVisible" :class="['fixed bottom-4 left-4 rounded-lg p-4 shadow-lg transition-transform', notificationType === 'success' ? 'bg-primary-600 text-white' : 'bg-red-600 text-white']">
+            {{ notificationMessage }}
+        </div>
     </template>
 </template>

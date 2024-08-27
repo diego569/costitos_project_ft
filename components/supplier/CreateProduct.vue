@@ -103,14 +103,23 @@
         file.value = null;
         preview.value = null;
     };
+    const emit = defineEmits(["notify", "productAdded"]);
 
     const uploadImageHandler = async () => {
         try {
             const imageId = await uploadImage(file.value);
             const productId = await createProduct(product.value, selectedSubcategoryId.value, imageId);
             await createSupplierProduct(supplierProduct.value, productId, product.value.name);
+
             message.value = "Producto creado exitosamente!";
             isSuccess.value = true;
+
+            emit("notify", {message: message.value, type: "success"});
+
+            emit("productAdded");
+
+            props.closeModal();
+
             product.value = {name: "", description: "", subcategoryId: ""};
             supplierProduct.value = {price: 0, unitOfMeasure: ""};
             file.value = null;
@@ -118,6 +127,8 @@
         } catch (error) {
             message.value = error.message;
             isSuccess.value = false;
+
+            emit("notify", {message: message.value, type: "error"});
         }
     };
 </script>
@@ -220,10 +231,6 @@
                                     Guardar
                                 </button>
                             </div>
-
-                            <p v-if="message" :class="{'text-green-500': isSuccess, 'text-red-500': !isSuccess}" class="mt-4">
-                                {{ message }}
-                            </p>
                         </DialogPanel>
                     </TransitionChild>
                 </div>
