@@ -78,5 +78,5 @@ export const createSupplierProduct = async (supplierProduct, productId, productN
         throw new Error("Error al crear el producto.");
     }
 
-    return true; // Indica que la creación fue exitosa
+    return true;
 };

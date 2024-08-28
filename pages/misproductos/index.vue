@@ -1,6 +1,7 @@
 <script setup>
     import {ref, onMounted} from "vue";
     import {fetchWithAuth, getUserId} from "@/services/auth";
+    import {TransitionRoot, TransitionChild} from "@headlessui/vue"; // Asegúrate de que estos estén importados correctamente
 
     const supplierId = getUserId();
 
@@ -202,26 +203,41 @@
                 <h6 class="p-3 text-lg font-bold">Categorías</h6>
                 <div class="overflow-auto">
                     <div v-for="category in categories" :key="category.id">
-                        <div @click="selectCategory(category)" :class="{'text-black': selectedCategory === category.id, 'text-gray-600': selectedCategory !== category.id}" class="cursor-pointer border-t p-2 hover:bg-primary-200">
-                            <div class="flex size-full items-center p-1.5">
-                                <Icon :name="selectedCategory === category.id ? 'my-icon:caret-down' : 'my-icon:caret-right'" size="20" />
-                                <Icon :name="selectedCategory === category.id ? 'my-icon:folder-open' : 'my-icon:folder-close'" size="20" class="ml-2" />
-                                <p class="ml-2 font-sans text-sm font-normal leading-normal antialiased">{{ category.name }}</p>
-                            </div>
-                        </div>
-                        <div v-if="selectedCategory === category.id">
-                            <div
-                                v-for="subcategory in subcategories"
-                                :key="subcategory.id"
-                                @click="selectSubcategory(subcategory)"
-                                :class="{'bg-primary-500 text-white': selectedSubcategory === subcategory.id, 'text-gray-600 hover:bg-primary-200': selectedSubcategory !== subcategory.id}"
-                                class="cursor-pointer border-t p-2 text-gray-400">
-                                <div class="flex size-full items-center p-1.5">
-                                    <Icon name="my-icon:circles-four" size="20" class="ml-2" />
-                                    <p class="ml-2 font-sans text-sm font-normal leading-normal antialiased">{{ subcategory.name }}</p>
+                        <div @click="selectCategory(category)" :class="{'text-black': selectedCategory === category.id, 'text-gray-600': selectedCategory !== category.id}" class="flex cursor-pointer items-center justify-start border-t p-2 hover:bg-primary-200">
+                            <div class="flex items-center gap-2">
+                                <div class="flex h-full w-full items-center justify-center">
+                                    <Icon :name="selectedCategory === category.id ? 'my-icon:caret-down' : 'my-icon:caret-right'" size="20" />
                                 </div>
+                                <div class="flex h-full w-full items-center justify-center">
+                                    <Icon :name="selectedCategory === category.id ? 'my-icon:folder-open' : 'my-icon:folder-close'" size="20" />
+                                </div>
+                                <p class="select-none font-sans text-xs font-normal leading-normal antialiased">{{ category.name }}</p>
                             </div>
                         </div>
+                        <TransitionRoot :show="selectedCategory === category.id" as="template">
+                            <TransitionChild
+                                as="div"
+                                enter="transition ease-out duration-300 transform"
+                                enter-from="-translate-y-4 opacity-0"
+                                enter-to="translate-y-0 opacity-100"
+                                leave="transition ease-in duration-200 transform"
+                                leave-from="translate-y-0 opacity-100"
+                                leave-to="-translate-y-4 opacity-0">
+                                <div v-if="selectedCategory === category.id">
+                                    <div
+                                        v-for="subcategory in subcategories"
+                                        :key="subcategory.id"
+                                        @click="selectSubcategory(subcategory)"
+                                        :class="{'bg-primary-500 text-white': selectedSubcategory === subcategory.id, 'text-gray-600 hover:bg-primary-200': selectedSubcategory !== subcategory.id}"
+                                        class="cursor-pointer border-t p-2 text-gray-400">
+                                        <div class="flex items-center gap-2">
+                                            <Icon name="my-icon:circles-four" size="20" />
+                                            <p class="select-none font-sans text-xs font-normal leading-normal antialiased">{{ subcategory.name }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </TransitionChild>
+                        </TransitionRoot>
                     </div>
                 </div>
             </div>
@@ -309,8 +325,6 @@
 
         <SupplierCreateProduct :showModal="showModal" :closeModal="closeModal" :categoryId="selectedCategory" :subcategoryId="selectedSubcategory" @notify="handleNotification" @productAdded="updateProductList" />
 
-        <div v-if="isNotificationVisible" :class="['fixed bottom-4 left-4 rounded-lg p-4 shadow-lg transition-transform', notificationType === 'success' ? 'bg-primary-600 text-white' : 'bg-red-600 text-white']">
-            {{ notificationMessage }}
-        </div>
+        <Notification :message="notificationMessage" :type="notificationType" />
     </template>
 </template>
