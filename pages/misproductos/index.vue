@@ -1,7 +1,7 @@
 <script setup>
     import {ref, onMounted} from "vue";
     import {fetchWithAuth, getUserId} from "@/services/auth";
-    import {TransitionRoot, TransitionChild} from "@headlessui/vue"; // Asegúrate de que estos estén importados correctamente
+    import {TransitionRoot, TransitionChild} from "@headlessui/vue";
 
     const supplierId = getUserId();
 
@@ -52,7 +52,6 @@
             isLoadingProducts.value = false;
         }
     };
-
     const fetchProductsBySupplierAndCategory = async (categoryId) => {
         isLoadingProducts.value = true;
         try {
@@ -195,136 +194,152 @@
             fetchProductsBySupplier();
         }
     };
+
+    //
+    const showCreateCategoryModal = ref(false);
+
+    const openCreateCategoryModal = () => {
+        showCreateCategoryModal.value = true;
+    };
+
+    const closeCreateCategoryModal = () => {
+        showCreateCategoryModal.value = false;
+    };
+
+    const handleCategoryCreated = (newCategory) => {
+        categories.value.push(newCategory);
+        console.log("Nueva categoría creada:", newCategory);
+    };
 </script>
 <template>
-    <template>
-        <Main class="max-h-[calc(100vh_-_100px)]">
-            <div class="col-span-3 overflow-auto rounded-lg border bg-white md:col-span-2">
-                <h6 class="p-3 text-lg font-bold">Categorías</h6>
-                <div class="overflow-auto">
-                    <div v-for="category in categories" :key="category.id">
-                        <div @click="selectCategory(category)" :class="{'text-black': selectedCategory === category.id, 'text-gray-600': selectedCategory !== category.id}" class="flex cursor-pointer items-center justify-start border-t p-2 hover:bg-primary-200">
-                            <div class="flex items-center gap-2">
-                                <div class="flex h-full w-full items-center justify-center">
-                                    <Icon :name="selectedCategory === category.id ? 'my-icon:caret-down' : 'my-icon:caret-right'" size="20" />
-                                </div>
-                                <div class="flex h-full w-full items-center justify-center">
-                                    <Icon :name="selectedCategory === category.id ? 'my-icon:folder-open' : 'my-icon:folder-close'" size="20" />
-                                </div>
-                                <p class="select-none font-sans text-xs font-normal leading-normal antialiased">{{ category.name }}</p>
+    <SupplierMain class="max-h-[calc(100vh_-_100px)]">
+        <div class="overflow-auto rounded-lg border bg-white md:col-span-2">
+            <h6 class="p-3 text-lg font-bold">Categorías</h6>
+            <div class="overflow-auto">
+                <div v-for="category in categories" :key="category.id">
+                    <div @click="selectCategory(category)" :class="{'text-black': selectedCategory === category.id, 'text-gray-600': selectedCategory !== category.id}" class="flex cursor-pointer items-center justify-start border-t p-2 hover:bg-primary-200">
+                        <div class="flex items-center gap-2">
+                            <div class="flex h-full w-full items-center justify-center">
+                                <Icon :name="selectedCategory === category.id ? 'my-icon:caret-down' : 'my-icon:caret-right'" size="20" />
                             </div>
+                            <div class="flex h-full w-full items-center justify-center">
+                                <Icon :name="selectedCategory === category.id ? 'my-icon:folder-open' : 'my-icon:folder-close'" size="20" />
+                            </div>
+                            <p class="select-none font-sans text-xs font-normal leading-normal antialiased">{{ category.name }}</p>
                         </div>
-                        <TransitionRoot :show="selectedCategory === category.id" as="template">
-                            <TransitionChild
-                                as="div"
-                                enter="transition ease-out duration-300 transform"
-                                enter-from="-translate-y-4 opacity-0"
-                                enter-to="translate-y-0 opacity-100"
-                                leave="transition ease-in duration-200 transform"
-                                leave-from="translate-y-0 opacity-100"
-                                leave-to="-translate-y-4 opacity-0">
-                                <div v-if="selectedCategory === category.id">
-                                    <div
-                                        v-for="subcategory in subcategories"
-                                        :key="subcategory.id"
-                                        @click="selectSubcategory(subcategory)"
-                                        :class="{'bg-primary-500 text-white': selectedSubcategory === subcategory.id, 'text-gray-600 hover:bg-primary-200': selectedSubcategory !== subcategory.id}"
-                                        class="cursor-pointer border-t p-2 text-gray-400">
-                                        <div class="flex items-center gap-2">
-                                            <Icon name="my-icon:circles-four" size="20" />
-                                            <p class="select-none font-sans text-xs font-normal leading-normal antialiased">{{ subcategory.name }}</p>
-                                        </div>
+                    </div>
+                    <TransitionRoot :show="selectedCategory === category.id" as="template">
+                        <TransitionChild
+                            as="div"
+                            enter="transition ease-out duration-300 transform"
+                            enter-from="-translate-y-4 opacity-0"
+                            enter-to="translate-y-0 opacity-100"
+                            leave="transition ease-in duration-200 transform"
+                            leave-from="translate-y-0 opacity-100"
+                            leave-to="-translate-y-4 opacity-0">
+                            <div v-if="selectedCategory === category.id">
+                                <div
+                                    v-for="subcategory in subcategories"
+                                    :key="subcategory.id"
+                                    @click="selectSubcategory(subcategory)"
+                                    :class="{'bg-primary-500 text-white': selectedSubcategory === subcategory.id, 'text-gray-600 hover:bg-primary-200': selectedSubcategory !== subcategory.id}"
+                                    class="cursor-pointer border-t p-2 text-gray-400">
+                                    <div class="flex items-center gap-2">
+                                        <Icon name="my-icon:circles-four" size="20" />
+                                        <p class="select-none font-sans text-xs font-normal leading-normal antialiased">{{ subcategory.name }}</p>
                                     </div>
                                 </div>
-                            </TransitionChild>
-                        </TransitionRoot>
-                    </div>
+                            </div>
+                        </TransitionChild>
+                    </TransitionRoot>
                 </div>
             </div>
-            <div :class="['hidden h-full overflow-auto rounded-lg md:block', showMenu ? 'col-span-2 2xl:col-span-3' : 'col-span-2 lg:col-span-3 xl:col-span-4 2xl:col-span-5']">
-                <div v-if="!selectedCategory">
-                    <div v-if="isLoadingProducts">
-                        <p>Cargando productos...</p>
-                    </div>
-                    <div v-else>
-                        <div class="flex justify-between">
-                            <h6 class="p-1.5 text-lg font-bold">Buscar Productos</h6>
-                            <button @click="openModal" class="relative flex items-center rounded-md bg-primary-600 px-3 py-1.5 text-sm text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-primary-100">
-                                <Icon name="my-icon:plus" size="20" class="ml-2" />
-                                <span class="ml-2 hidden md:block"> Agregar nuevo producto</span>
-                            </button>
-                        </div>
-                        <input type="text" v-model="categorySearchQuery" @input="searchProductsBySupplier" placeholder="Buscar productos..." class="mb-4 w-full rounded border p-2" />
-                        <div v-if="isLoadingDefaultSearchResults">
-                            <p>Cargando resultados...</p>
-                        </div>
-                        <Main2 v-else>
-                            <ProductCard3 v-for="product in defaultSearchResults" :key="product.supplier_product_id" :product="product" />
-                            <p v-if="!defaultSearchResults.length && categorySearchQuery.trim()">No se encontraron resultados para "{{ categorySearchQuery }}"</p>
-                        </Main2>
-                        <h6 class="mt-4 p-3 text-lg font-bold">Productos</h6>
-                        <Main2>
-                            <ProductCard3 v-for="product in products" :key="product.supplier_product_id" :product="product" />
-                        </Main2>
-                    </div>
+        </div>
+        <div :class="['hidden h-full overflow-auto rounded-lg md:block', showMenu ? 'col-span-2 md:col-span-4 xl:col-span-6' : 'col-span-2 md:col-span-4 lg:col-span-6 xl:col-span-8']">
+            <div v-if="!selectedCategory">
+                <div v-if="isLoadingProducts">
+                    <p>Cargando productos...</p>
                 </div>
-                <div v-if="selectedCategory && !selectedSubcategory">
-                    <div v-if="isLoadingProducts">
-                        <p>Cargando productos...</p>
+                <div v-else>
+                    <div class="flex justify-between">
+                        <h6 class="p-1.5 text-lg font-bold">Buscar Productos</h6>
+                        <button @click="openModal" class="relative flex items-center rounded-md bg-primary-600 px-3 py-1.5 text-sm text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-primary-100">
+                            <Icon name="my-icon:plus" size="20" class="ml-2" />
+                            <span class="ml-2 hidden md:block"> Agregar nuevo producto</span>
+                        </button>
                     </div>
-                    <div v-else>
-                        <div class="flex justify-between">
-                            <h6 class="p-1.5 text-lg font-bold">Buscar Productos en Categoría</h6>
-                            <button @click="openModal" class="relative flex items-center rounded-md bg-primary-600 px-3 py-1.5 text-sm text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-primary-100">
-                                <Icon name="my-icon:plus" size="20" class="ml-2" />
-                                <span class="ml-2 hidden md:block"> Agregar nuevo producto</span>
-                            </button>
-                        </div>
-                        <input type="text" v-model="categorySearchQuery" @input="searchProductsBySupplierAndCategory" placeholder="Buscar productos..." class="mb-4 w-full rounded border p-2" />
-                        <div v-if="isLoadingCategorySearchResults">
-                            <p>Cargando resultados...</p>
-                        </div>
-                        <Main2 v-else>
-                            <ProductCard3 v-for="product in categorySearchResults" :key="product.supplier_product_id" :product="product" />
-                            <p v-if="!categorySearchResults.length && categorySearchQuery.trim()">No se encontraron resultados para "{{ categorySearchQuery }}"</p>
-                        </Main2>
-                        <h6 class="mt-4 p-3 text-lg font-bold">Productos</h6>
-                        <Main2>
-                            <ProductCard3 v-for="product in products" :key="product.supplier_product_id" :product="product" />
-                        </Main2>
+                    <Input id="defaultSearch" type="text" v-model="categorySearchQuery" @input="searchProductsBySupplier" placeholder="Buscar productos..." />
+                    <div v-if="isLoadingDefaultSearchResults">
+                        <p>Cargando resultados...</p>
                     </div>
-                </div>
-                <div v-if="selectedSubcategory">
-                    <div v-if="isLoadingProducts">
-                        <p>Cargando productos...</p>
-                    </div>
-                    <div v-else>
-                        <div class="flex justify-between">
-                            <h6 class="p-1.5 text-lg font-bold">Buscar Productos en Subcategoría</h6>
-                            <button @click="openModal" class="relative flex items-center rounded-md bg-primary-600 px-3 py-1.5 text-sm text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-primary-100">
-                                <Icon name="my-icon:plus" size="20" class="ml-2" />
-                                <span class="ml-2 hidden md:block"> Agregar nuevo producto</span>
-                            </button>
-                        </div>
-                        <input type="text" v-model="subcategorySearchQuery" @input="searchProductsBySupplierAndSubcategory" placeholder="Buscar productos..." class="mb-4 w-full rounded border p-2" />
-                        <div v-if="isLoadingSubcategorySearchResults">
-                            <p>Cargando resultados...</p>
-                        </div>
-                        <Main2 v-else>
-                            <ProductCard3 v-for="product in subcategorySearchResults" :key="product.supplier_product_id" :product="product" />
-                            <p v-if="!subcategorySearchResults.length && subcategorySearchQuery.trim()">No se encontraron resultados para "{{ subcategorySearchQuery }}"</p>
-                        </Main2>
-                        <h6 class="mt-4 p-3 text-lg font-bold">Productos</h6>
-                        <Main2>
-                            <ProductCard3 v-for="product in products" :key="product.supplier_product_id" :product="product" />
-                        </Main2>
-                    </div>
+                    <SupplierSubmain v-else>
+                        <SupplierProduct v-for="product in defaultSearchResults" :key="product.supplier_product_id" :product="product" />
+                        <p v-if="!defaultSearchResults.length && categorySearchQuery.trim()">No se encontraron resultados para "{{ categorySearchQuery }}"</p>
+                    </SupplierSubmain>
+                    <h6 class="mt-4 p-3 text-lg font-bold">Productos</h6>
+                    <SupplierSubmain>
+                        <SupplierProduct v-for="product in products" :key="product.supplier_product_id" :product="product" />
+                    </SupplierSubmain>
                 </div>
             </div>
-        </Main>
+            <div v-if="selectedCategory && !selectedSubcategory">
+                <div v-if="isLoadingProducts">
+                    <p>Cargando productos...</p>
+                </div>
+                <div v-else>
+                    <div class="flex justify-between">
+                        <h6 class="p-1.5 text-lg font-bold">Buscar Productos en Categoría</h6>
+                        <button @click="openModal" class="relative flex items-center rounded-md bg-primary-600 px-3 py-1.5 text-sm text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-primary-100">
+                            <Icon name="my-icon:plus" size="20" class="ml-2" />
+                            <span class="ml-2 hidden md:block"> Agregar nuevo producto</span>
+                        </button>
+                    </div>
+                    <Input id="categorySearch" type="text" v-model="categorySearchQuery" @input="searchProductsBySupplierAndCategory" placeholder="Buscar productos..." />
+                    <div v-if="isLoadingCategorySearchResults">
+                        <p>Cargando resultados...</p>
+                    </div>
+                    <SupplierSubmain v-else>
+                        <SupplierProduct v-for="product in categorySearchResults" :key="product.supplier_product_id" :product="product" />
+                        <p v-if="!categorySearchResults.length && categorySearchQuery.trim()">No se encontraron resultados para "{{ categorySearchQuery }}"</p>
+                    </SupplierSubmain>
+                    <h6 class="mt-4 p-3 text-lg font-bold">Productos</h6>
+                    <SupplierSubmain>
+                        <SupplierProduct v-for="product in products" :key="product.supplier_product_id" :product="product" />
+                    </SupplierSubmain>
+                </div>
+            </div>
+            <div v-if="selectedSubcategory">
+                <div v-if="isLoadingProducts">
+                    <p>Cargando productos...</p>
+                </div>
+                <div v-else>
+                    <div class="flex justify-between">
+                        <h6 class="p-1.5 text-lg font-bold">Buscar Productos en Subcategoría</h6>
+                        <button @click="openModal" class="relative flex items-center rounded-md bg-primary-600 px-3 py-1.5 text-sm text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-primary-100">
+                            <Icon name="my-icon:plus" size="20" class="ml-2" />
+                            <span class="ml-2 hidden md:block"> Agregar nuevo producto</span>
+                        </button>
+                    </div>
+                    <Input id="subcategorySearch" type="text" v-model="subcategorySearchQuery" @input="searchProductsBySupplierAndSubcategory" placeholder="Buscar productos..." />
+                    <div v-if="isLoadingSubcategorySearchResults">
+                        <p>Cargando resultados...</p>
+                    </div>
+                    <SupplierSubmain v-else>
+                        <SupplierProduct v-for="product in subcategorySearchResults" :key="product.supplier_product_id" :product="product" />
+                        <p v-if="!subcategorySearchResults.length && subcategorySearchQuery.trim()">No se encontraron resultados para "{{ subcategorySearchQuery }}"</p>
+                    </SupplierSubmain>
+                    <h6 class="mt-4 p-3 text-lg font-bold">Productos</h6>
+                    <SupplierSubmain>
+                        <SupplierProduct v-for="product in products" :key="product.supplier_product_id" :product="product" />
+                    </SupplierSubmain>
+                </div>
+            </div>
+        </div>
+    </SupplierMain>
 
-        <SupplierCreateProduct :showModal="showModal" :closeModal="closeModal" :categoryId="selectedCategory" :subcategoryId="selectedSubcategory" @notify="handleNotification" @productAdded="updateProductList" />
+    <SupplierCreateProduct :showModal="showModal" :closeModal="closeModal" :categoryId="selectedCategory" :subcategoryId="selectedSubcategory" @notify="handleNotification" @productAdded="updateProductList" />
 
-        <Notification :message="notificationMessage" :type="notificationType" />
-    </template>
+    <Notification :message="notificationMessage" :type="notificationType" />
+
+    <SupplierCreateCategory :showModal="showCreateCategoryModal" :closeModal="closeCreateCategoryModal" :onCategoryCreated="handleCategoryCreated" />
 </template>

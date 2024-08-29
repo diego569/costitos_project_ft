@@ -131,6 +131,39 @@
             emit("notify", {message: message.value, type: "error"});
         }
     };
+
+    const showCreateCategoryModal = ref(false);
+
+    const openCreateCategoryModal = () => {
+        showCreateCategoryModal.value = true;
+    };
+
+    const closeCreateCategoryModal = () => {
+        showCreateCategoryModal.value = false;
+    };
+
+    const handleCategoryCreated = (newCategory) => {
+        categories.value.push(newCategory);
+        selectedCategoryId.value = newCategory.id;
+        fetchSubcategories(newCategory.id);
+        console.log("Nueva categoría creada:", newCategory);
+    };
+
+    //
+    const showCreateSubcategoryModal = ref(false);
+
+    const openCreateSubcategoryModal = () => {
+        showCreateSubcategoryModal.value = true;
+    };
+
+    const closeCreateSubcategoryModal = () => {
+        showCreateSubcategoryModal.value = false;
+    };
+
+    const handleSubcategoryCreated = (newSubcategory) => {
+        subcategories.value.push(newSubcategory);
+        selectedSubcategoryId.value = newSubcategory.id;
+    };
 </script>
 <template>
     <TransitionRoot appear :show="showModal" as="template">
@@ -194,6 +227,10 @@
                                                     {{ category.name }}
                                                 </option>
                                             </select>
+                                            <div @click="openCreateCategoryModal" class="mt-2 cursor-pointer text-primary-600 hover:text-primary-800">
+                                                <p class="select-none font-sans text-xs font-normal leading-normal antialiased">Crear nueva categoría</p>
+                                            </div>
+                                            <SupplierCreateCategory :showModal="showCreateCategoryModal" :closeModal="closeCreateCategoryModal" :onCategoryCreated="handleCategoryCreated" />
                                         </div>
 
                                         <div v-if="selectedCategoryId && subcategories.length > 0">
@@ -203,8 +240,17 @@
                                                     {{ subcategory.name }}
                                                 </option>
                                             </select>
+                                            <div @click="openCreateSubcategoryModal" class="mt-2 cursor-pointer text-primary-600 hover:text-primary-800">
+                                                <p class="select-none font-sans text-xs font-normal leading-normal antialiased">Crear nueva subcategoría</p>
+                                            </div>
+                                            <SupplierCreateSubcategory :showModal="showCreateSubcategoryModal" :closeModal="closeCreateSubcategoryModal" :categoryId="selectedCategoryId" :onSubcategoryCreated="handleSubcategoryCreated" />
                                         </div>
-
+                                        <div v-if="selectedCategoryId && subcategories.length == 0">
+                                            <div @click="openCreateSubcategoryModal" class="mt-2 flex h-full cursor-pointer items-center text-primary-600 hover:text-primary-800">
+                                                <p class="select-none font-sans text-xs font-normal leading-normal antialiased">Crear nueva subcategoría</p>
+                                            </div>
+                                            <SupplierCreateSubcategory :showModal="showCreateSubcategoryModal" :closeModal="closeCreateSubcategoryModal" :categoryId="selectedCategoryId" :onSubcategoryCreated="handleSubcategoryCreated" />
+                                        </div>
                                         <div class="sm:col-span-2">
                                             <Label forId="description" text="Descripción:" />
                                             <textarea
