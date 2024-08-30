@@ -35,7 +35,7 @@
             </div>
         </div>
         <div class="flex justify-center border-t p-2 disabled:cursor-not-allowed sm:p-4">
-            <button :disabled="carrito.length === 0" @click="enviarCotizacion" class="rounded bg-blue-500 p-2 text-white">Enviar Cotización</button>
+            <ButtonC :label="'Agregar Productos'" :disabled="carrito.length === 0" @Click="enviarCotizacion" />
         </div>
     </div>
 </template>
@@ -75,7 +75,7 @@
 
             console.table(products);
 
-            const userId = "92c05463-e920-4153-bc38-5c6352701769"; // Ajusta esto según tu lógica
+            const userId = "92c05463-e920-4153-bc38-5c6352701769";
 
             const response = await fetch("http://localhost:8000/api/supplier/carrito/addsupplierproducts", {
                 method: "POST",

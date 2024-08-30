@@ -125,7 +125,7 @@
                     <NuxtPage class="grid min-w-[360px]" />
                 </div>
                 <div v-if="showMenu" :class="['sticky top-20 hidden max-h-[calc(100vh_-_100px)] items-start justify-center rounded-lg bg-white shadow-sm lg:flex lg:flex-col', showMenu ? 'col-span-2' : '']">
-                    <Carrito v-if="userRole !== 'supplier'" />
+                    <UserCart v-if="userRole !== 'supplier'" />
                     <CarritoSupplier v-else />
                 </div>
             </div>

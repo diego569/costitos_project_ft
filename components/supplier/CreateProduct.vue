@@ -16,10 +16,7 @@
         description: "",
         subcategoryId: props.subcategoryId || "",
     });
-    const supplierProduct = ref({
-        price: 0,
-        unitOfMeasure: "",
-    });
+
     const file = ref(null);
     const preview = ref(null);
     const message = ref("");
@@ -164,6 +161,30 @@
         subcategories.value.push(newSubcategory);
         selectedSubcategoryId.value = newSubcategory.id;
     };
+
+    const unitOfMeasures = [
+        {value: "kg", label: "kg (Kilogramos)"},
+        {value: "g", label: "g (Gramos)"},
+        {value: "lb", label: "lb (Libras)"},
+        {value: "oz", label: "oz (Onzas)"},
+        {value: "L", label: "L (Litros)"},
+        {value: "ml", label: "ml (Mililitros)"},
+        {value: "gal", label: "gal (Galones)"},
+        {value: "fl oz", label: "fl oz (Onzas líquidas)"},
+        {value: "m", label: "m (Metros)"},
+        {value: "cm", label: "cm (Centímetros)"},
+        {value: "mm", label: "mm (Milímetros)"},
+        {value: "in", label: "in (Pulgadas)"},
+        {value: "ft", label: "ft (Pies)"},
+        {value: "u", label: "u (Unidad)"},
+        {value: "pkg", label: "pkg (Paquete)"},
+        {value: "doz", label: "doz (Docena)"},
+    ];
+
+    const supplierProduct = ref({
+        price: "",
+        unitOfMeasure: unitOfMeasures[0].value,
+    });
 </script>
 <template>
     <TransitionRoot appear :show="showModal" as="template">
@@ -217,7 +238,11 @@
 
                                         <div>
                                             <Label forId="unitOfMeasure" text="Unidad de medida:" />
-                                            <Input id="unitOfMeasure" v-model="supplierProduct.unitOfMeasure" type="text" placeholder="Unidad de medida" required />
+                                            <select v-model="supplierProduct.unitOfMeasure" id="unitOfMeasure" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500">
+                                                <option v-for="unit in unitOfMeasures" :key="unit.value" :value="unit.value">
+                                                    {{ unit.label }}
+                                                </option>
+                                            </select>
                                         </div>
 
                                         <div>
