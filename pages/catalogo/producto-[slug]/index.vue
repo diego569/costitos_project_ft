@@ -99,7 +99,3 @@
 
     onMounted(fetchProductDetails);
 </script>
-
-<style scoped>
-    /* Añade cualquier estilo adicional aquí si es necesario */
-</style>

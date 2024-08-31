@@ -88,17 +88,17 @@
 <template>
     <div>
         <h6 class="p-4 text-xl font-bold">Buscar Productos</h6>
-        <input type="text" v-model="searchQuery" @input="searchProducts" placeholder="Buscar productos..." class="mb-4 w-full rounded border p-2" />
-
+        <Input type="text" v-model="searchQuery" @input="searchProducts" placeholder="Buscar productos..." class="mb-4 w-full rounded border p-2" />
         <Main v-if="searchQuery">
-            <ProductCard v-for="product in searchResults" :key="product.id" :product="product" :updatePrice="updatePrice" @agregar="agregarAlCarrito" />
+            <UserProductCard :products="searchResults" @agregar="agregarAlCarrito" :updatePrice="updatePrice" />
         </Main>
     </div>
     <div>
-        <h6 class="p-4 text-xl font-bold">Categorías</h6>
-        <Main>
-            <CategoryCard v-for="category in categories" :key="category.id" :category="category" />
-        </Main>
+        <p class="py-4 text-center text-xl text-gray-500"><span class="font-bold text-gray-900">Categorias</span></p>
+
+        <UserMain>
+            <UserCategoryCard :items="categories" category />
+        </UserMain>
     </div>
 
     <div>
@@ -107,7 +107,7 @@
             <ProductCardSkeleton v-for="n in 6" :key="n" />
         </Main>
         <Main v-else>
-            <ProductCard v-for="product in recentProducts" :key="product.id" :product="product" :updatePrice="updatePrice" @agregar="agregarAlCarrito" />
+            <UserProductCard :products="recentProducts" @agregar="agregarAlCarrito" :updatePrice="updatePrice" />
         </Main>
     </div>
 
@@ -117,7 +117,7 @@
             <ProductCardSkeleton v-for="n in 6" :key="n" />
         </Main>
         <Main v-else>
-            <ProductCard v-for="product in quotedProducts" :key="product.id" :product="product" :updatePrice="updatePrice" @agregar="agregarAlCarrito" />
+            <UserProductCard :products="quotedProducts" @agregar="agregarAlCarrito" :updatePrice="updatePrice" />
         </Main>
     </div>
 </template>

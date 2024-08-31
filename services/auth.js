@@ -82,3 +82,36 @@ export const fetchWithAuth = async (url, method, body) => {
         throw error;
     }
 };
+// Nueva función login
+export async function login(credentials, error) {
+    try {
+        const response = await fetch("http://localhost:8000/api/auth/ingresar/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(credentials),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message);
+        }
+
+        const data = await response.json();
+        localStorage.setItem("userData", JSON.stringify(data.data));
+        localStorage.setItem("token", data.token);
+        error.value = "";
+
+        const role = data.data.role;
+        if (role === "user") {
+            window.location.href = "/catalogo";
+        } else if (role === "supplier") {
+            window.location.href = "/explorar";
+        } else {
+            window.location.href = "/";
+        }
+    } catch (err) {
+        error.value = err.message;
+    }
+}

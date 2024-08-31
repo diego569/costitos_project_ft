@@ -91,10 +91,11 @@
                             </button>
                         </div>
                         <div class="flex w-full flex-row items-end gap-2">
-                            <div class="flex items-end gap-2">
-                                <button @click="decrementarCantidad(item.producto.id, item.producto.unitOfMeasure)" class="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-200 text-gray-700">-</button>
-                                <input type="number" v-model.number="item.cantidad" class="flex h-8 w-14 rounded-lg border border-gray-200 bg-white text-center text-gray-900" @change="updateCantidad(item.producto.id, item.producto.unitOfMeasure, item.cantidad)" />
-                                <button @click="incrementarCantidad(item.producto.id, item.producto.unitOfMeasure)" class="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-200 text-gray-700">+</button>
+                            <div class="flex items-center gap-2 md:max-w-[150px]">
+                                <button @click="decrementarCantidad(item.producto.id, item.producto.unitOfMeasure)" class="flex aspect-square size-10 items-center justify-center rounded-lg bg-gray-200 px-4 text-gray-700">-</button>
+                                <Input type="text" class="text-center" v-model.number="item.cantidad" @change="updateCantidad(item.producto.id, item.producto.unitOfMeasure, item.cantidad)" oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');" />
+
+                                <button @click="incrementarCantidad(item.producto.id, item.producto.unitOfMeasure)" class="flex aspect-square size-10 items-center justify-center rounded-lg bg-gray-200 px-4 text-gray-700">+</button>
                             </div>
                         </div>
                     </div>

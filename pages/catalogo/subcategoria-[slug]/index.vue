@@ -78,9 +78,10 @@
 <template>
     <div>
         <h6 class="p-4 text-xl font-bold">Buscar Productos</h6>
-        <input type="text" v-model="searchQuery" @input="searchProducts" placeholder="Buscar productos..." class="mb-4 w-full rounded border p-2" />
+        <Input type="text" v-model="searchQuery" @input="searchProducts" placeholder="Buscar productos..." class="mb-4 w-full rounded border p-2" />
+
         <Main v-if="searchQuery">
-            <ProductCard v-for="product in searchResults" :key="product.id" :product="product" :updatePrice="updatePrice" @agregar="agregarAlCarrito" />
+            <UserProductCard :products="searchResults" @agregar="agregarAlCarrito" :updatePrice="updatePrice" />
         </Main>
     </div>
 
@@ -90,7 +91,7 @@
             <ProductCardSkeleton v-for="n in 6" :key="n" />
         </Main>
         <Main v-else>
-            <ProductCard v-for="product in products" :key="product.id" :product="product" :updatePrice="updatePrice" @agregar="agregarAlCarrito" />
+            <UserProductCard :products="products" @agregar="agregarAlCarrito" :updatePrice="updatePrice" />
         </Main>
     </div>
 
@@ -100,7 +101,7 @@
             <ProductCardSkeleton v-for="n in 6" :key="n" />
         </Main>
         <Main v-else>
-            <ProductCard v-for="product in mostQuotedProducts" :key="product.id" :product="product" :updatePrice="updatePrice" @agregar="agregarAlCarrito" />
+            <UserProductCard :products="mostQuotedProducts" @agregar="agregarAlCarrito" :updatePrice="updatePrice" />
         </Main>
     </div>
 </template>
