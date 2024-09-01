@@ -46,7 +46,7 @@
 
 <template>
     <div v-for="item in displayedItems" :key="item.slug">
-        <NuxtLink :to="{name: isSubcategory ? 'catalogo-subcategoria-slug' : 'catalogo-categoria-slug', params: {slug: item.slug}}" class="flex h-16 cursor-pointer items-center rounded-xl border bg-white bg-clip-border text-gray-700 transition-all duration-300 hover:shadow-md">
+        <NuxtLink :to="{name: isSubcategory ? 'catalogo-subcategoria-slug' : 'catalogo-categoria-slug', params: {slug: item.slug}}" class="flex h-16 cursor-pointer items-center rounded-xl border border-gray-200 bg-white bg-clip-border text-gray-700 transition-all duration-300 hover:shadow-md">
             <div class="flex aspect-square h-16 w-16 items-center justify-center overflow-hidden rounded-l-md bg-gray-200">
                 <div v-if="!isImageLoaded" class="h-full w-full animate-pulse rounded-l-md bg-gray-300"></div>
                 <img v-if="item.photo" :src="item.photo" alt="category-image" class="object-cover" @load="handleImageLoad" />
