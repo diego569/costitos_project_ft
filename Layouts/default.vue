@@ -4,7 +4,7 @@
     import {Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems} from "@headlessui/vue";
     import {Bars3Icon, BellIcon, XMarkIcon, UserIcon, ShoppingCartIcon, RectangleGroupIcon, UserGroupIcon} from "@heroicons/vue/24/outline";
     import {getUserId, getUserName, getToken, logout} from "@/services/auth"; // Importar la función logout
-
+    import {apiurl} from "~/services/api.js";
     const props = defineProps({
         showMenu: Boolean,
     });
@@ -30,7 +30,7 @@
     const fetchQuotationCount = async () => {
         try {
             if (user.value.id) {
-                const response = await fetch(`http://localhost:8000/api/user/cotizaciones/${user.value.id}/quotationcount`, {
+                const response = await fetch(apiurl(`/user/cotizaciones/${user.value.id}/quotationcount`), {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",

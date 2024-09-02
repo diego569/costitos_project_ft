@@ -1,5 +1,6 @@
 import {v4 as uuidv4} from "uuid";
 import {fetchWithAuth, getUserId} from "@/services/auth";
+import {apiurl} from "~/services/api.js";
 
 export const uploadImage = async (file) => {
     if (!file) {
@@ -9,7 +10,7 @@ export const uploadImage = async (file) => {
     const formData = new FormData();
     formData.append("myfile", file);
 
-    const response = await fetch("http://localhost:8000/api/supplier/crear/uploadimage", {
+    const response = await fetch(apiurl("/supplier/crear/uploadimage"), {
         method: "POST",
         body: formData,
     });
@@ -36,7 +37,7 @@ export const createProduct = async (product, selectedSubcategoryId, imageId) => 
         updatedAt: new Date(),
     };
 
-    const response = await fetch("http://localhost:8000/api/supplier/crear/createproduct", {
+    const response = await fetch(apiurl("/supplier/crear/createproduct"), {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -66,7 +67,7 @@ export const createSupplierProduct = async (supplierProduct, productId, productN
         updatedAt: new Date(),
     };
 
-    const response = await fetch("http://localhost:8000/api/supplier/crear/createsupplierproduct", {
+    const response = await fetch(apiurl("/supplier/crear/createsupplierproduct"), {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

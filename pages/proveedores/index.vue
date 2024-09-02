@@ -1,7 +1,8 @@
 <script setup>
     import {ref, onMounted} from "vue";
     import {showMenu} from "@/services/menuService";
-    import {agregarProducto} from "~/services/carrito.js";
+    import {agregarProducto} from "~/services/usercart";
+    import {apiurl} from "~/services/api.js";
 
     const agregarAlCarrito = (producto) => {
         agregarProducto(producto, {supplierProductId: producto.id, unitOfMeasure: producto.unitOfMeasure});
@@ -33,7 +34,7 @@
 
     const fetchSuppliers = async () => {
         try {
-            const response = await fetch("http://localhost:8000/api/guest/proveedores/getsuppliers");
+            const response = await fetch(apiurl("//guest/proveedores/getsuppliers"));
             if (!response.ok) throw new Error("Failed to fetch suppliers");
 
             const data = await response.json();
@@ -44,11 +45,10 @@
             isLoadingSuppliers.value = false;
         }
     };
-
     const fetchCategoriesBySupplier = async (supplierId) => {
         try {
             isLoadingCategories.value = true;
-            const response = await fetch(`http://localhost:8000/api/guest/proveedores/getcategoriesbysupplier/${supplierId}`);
+            const response = await fetch(apiurl(`/guest/proveedores/getcategoriesbysupplier/${supplierId}`));
             if (!response.ok) throw new Error("Failed to fetch categories");
 
             const data = await response.json();
@@ -63,7 +63,7 @@
     const fetchSubcategoriesByCategoryAndSupplier = async (supplierId, categoryId) => {
         try {
             isLoadingSubcategories.value = true;
-            const response = await fetch(`http://localhost:8000/api/guest/proveedores/getsubcategoriesbysupplier/${supplierId}/${categoryId}`);
+            const response = await fetch(apiurl(`/guest/proveedores/getsubcategoriesbysupplier/${supplierId}/${categoryId}`));
             if (!response.ok) throw new Error("Failed to fetch subcategories");
 
             const data = await response.json();
@@ -80,7 +80,7 @@
     const fetchProductsBySubcategoryAndSupplier = async (supplierId, subcategorySlug) => {
         try {
             isLoadingProducts.value = true;
-            const response = await fetch(`http://localhost:8000/api/guest/proveedores/getproductsbysupplier/${supplierId}/subcategory/${subcategorySlug}`);
+            const response = await fetch(apiurl(`/guest/proveedores/getproductsbysupplier/${supplierId}/subcategory/${subcategorySlug}`));
             if (!response.ok) throw new Error("Failed to fetch products");
 
             const data = await response.json();
@@ -96,7 +96,7 @@
     const searchProducts = async () => {
         if (!selectedSupplier.value) return;
         try {
-            const response = await fetch(`http://localhost:8000/api/guest/proveedores/searchProductsBySupplier/${selectedSupplier.value.id}?query=${searchQuery.value}`);
+            const response = await fetch(apiurl(`/guest/proveedores/searchProductsBySupplier/${selectedSupplier.value.id}?query=${searchQuery.value}`));
             if (!response.ok) throw new Error("Failed to search products");
 
             const data = await response.json();
@@ -109,7 +109,7 @@
     const searchProductsByCategory = async () => {
         if (!selectedSupplier.value || !selectedCategory.value) return;
         try {
-            const response = await fetch(`http://localhost:8000/api/guest/proveedores/searchProductsBySupplierAndCategory/${selectedSupplier.value.id}/${selectedCategory.value.id}?query=${searchCategoryQuery.value}`);
+            const response = await fetch(apiurl(`/guest/proveedores/searchProductsBySupplierAndCategory/${selectedSupplier.value.id}/${selectedCategory.value.id}?query=${searchCategoryQuery.value}`));
             if (!response.ok) throw new Error("Failed to search products in category");
 
             const data = await response.json();
@@ -122,7 +122,7 @@
     const searchProductsBySubcategory = async () => {
         if (!selectedSupplier.value || !selectedSubcategory.value) return;
         try {
-            const response = await fetch(`http://localhost:8000/api/guest/proveedores/searchProductsBySubcategoryAndSupplier/${selectedSupplier.value.id}/${selectedSubcategory.value.id}?query=${searchSubcategoryQuery.value}`);
+            const response = await fetch(apiurl(`/guest/proveedores/searchProductsBySubcategoryAndSupplier/${selectedSupplier.value.id}/${selectedSubcategory.value.id}?query=${searchSubcategoryQuery.value}`));
             if (!response.ok) throw new Error("Failed to search products in subcategory");
 
             const data = await response.json();
@@ -214,18 +214,14 @@
                             <h6 class="p-3 text-lg font-bold">Buscar Productos en Subcategoría</h6>
                             <input type="text" v-model="searchSubcategoryQuery" @input="searchProductsBySubcategory" placeholder="Buscar productos..." class="mb-4 w-full rounded border p-2" />
                             <div v-if="searchSubcategoryQuery">
-                                <Main2 v-if="searchSubcategoryResults.length">
-                                    <ProductCard v-for="product in searchSubcategoryResults" :key="product.id" :product="product" :updatePrice="updatePrice" @agregar="agregarAlCarrito" />
-                                </Main2>
+                                <Main2 v-if="searchSubcategoryResults.length"> </Main2>
                                 <p v-else>No se encontraron resultados para "{{ searchSubcategoryQuery }}"</p>
                             </div>
                         </div>
                         <div>
                             <h6 class="p-3 text-lg font-bold">Productos</h6>
 
-                            <Main2>
-                                <ProductCard v-for="product in products" :key="product.id" :product="product" :updatePrice="updatePrice" @agregar="agregarAlCarrito" />
-                            </Main2>
+                            <Main2> <UserProductCard :products="products" @agregar="agregarAlCarrito" :updatePrice="updatePrice" /> </Main2>
                         </div>
                     </div>
                 </div>
@@ -240,7 +236,7 @@
                             <input type="text" v-model="searchCategoryQuery" @input="searchProductsByCategory" placeholder="Buscar productos..." class="mb-4 w-full rounded border p-2" />
                             <div v-if="searchCategoryQuery">
                                 <Main2 v-if="searchCategoryResults.length">
-                                    <ProductCard v-for="product in searchCategoryResults" :key="product.id" :product="product" :updatePrice="updatePrice" @agregar="agregarAlCarrito" />
+                                    <UserProductCard :products="searchCategoryResults" @agregar="agregarAlCarrito" :updatePrice="updatePrice" />
                                 </Main2>
                                 <p v-else>No se encontraron resultados para "{{ searchCategoryQuery }}"</p>
                             </div>
@@ -264,7 +260,7 @@
                             <input type="text" v-model="searchQuery" @input="searchProducts" placeholder="Buscar productos..." class="mb-4 w-full rounded border p-2" />
                             <div v-if="searchQuery">
                                 <Main2 v-if="searchResults.length">
-                                    <ProductCard v-for="product in searchResults" :key="product.id" :product="product" :updatePrice="updatePrice" @agregar="agregarAlCarrito" />
+                                    <UserProductCard :products="searchResults" @agregar="agregarAlCarrito" :updatePrice="updatePrice" />
                                 </Main2>
                                 <p v-else>No se encontraron resultados para "{{ searchQuery }}"</p>
                             </div>

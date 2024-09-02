@@ -91,6 +91,7 @@
 <script setup>
     import {ref} from "vue";
     import {useRouter} from "vue-router";
+    import {apiurl} from "~/services/api.js";
 
     const registerData = ref({
         dni: "",
@@ -126,7 +127,7 @@
         }
 
         try {
-            const response = await fetch("http://localhost:8000/api/auth/registrarse/register", {
+            const response = await fetch(apiurl("/auth/registrarse/register"), {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

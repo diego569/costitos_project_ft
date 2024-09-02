@@ -53,7 +53,8 @@
 <script setup>
     import {ref, onMounted} from "vue";
     import {useRoute} from "vue-router";
-    import {obtenerCarrito, agregarProducto, incrementarCantidad as incrementarCantidadCarrito, decrementarCantidad as decrementarCantidadCarrito, updateCantidad as updateCantidadCarrito} from "~/services/carrito.js";
+    import {obtenerCarrito, agregarProducto, incrementarCantidad as incrementarCantidadCarrito, decrementarCantidad as decrementarCantidadCarrito, updateCantidad as updateCantidadCarrito} from "~/services/usercart";
+    import {apiurl} from "~/services/api.js";
 
     const route = useRoute();
     const productSlug = route.params.slug;
@@ -62,7 +63,7 @@
 
     const fetchProductDetails = async () => {
         try {
-            const response = await fetch(`http://localhost:8000/api/user/getproductdetailsbysupplierproductslug/${productSlug}`);
+            const response = await fetch(apiurl(`/user/getproductdetailsbysupplierproductslug/${productSlug}`));
             if (!response.ok) throw new Error("Failed to fetch product details");
 
             const data = await response.json();

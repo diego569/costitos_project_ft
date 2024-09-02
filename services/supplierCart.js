@@ -1,85 +1,72 @@
-import {ref, computed, watch} from "vue";
+import {reactive, watchEffect} from "vue";
 
-const cartSp = ref([]);
-const showModalSp = ref(false);
-const modalProductSp = ref(null);
-const alertMessageSp = ref("");
-const showAlertSp = ref(false);
+const isBrowser = typeof window !== "undefined";
 
-const isLocalStorageAvailable = () => {
-    try {
-        const test = "__localStorageTest__";
-        localStorage.setItem(test, test);
-        localStorage.removeItem(test);
-        return true;
-    } catch (e) {
-        return false;
-    }
-};
+// Leer carrito de localStorage al iniciar
+const carritoSupplier = reactive(isBrowser ? JSON.parse(localStorage.getItem("carritoSupplier") || "[]") : []);
 
-if (isLocalStorageAvailable()) {
-    cartSp.value = JSON.parse(localStorage.getItem("supplierCart")) || [];
+// Guardar carrito en localStorage cada vez que cambie
+if (isBrowser) {
+    watchEffect(() => {
+        localStorage.setItem("carritoSupplier", JSON.stringify(carritoSupplier));
+    });
 }
 
-watch(
-    cartSp,
-    (newCart) => {
-        if (isLocalStorageAvailable()) {
-            localStorage.setItem("supplierCart", JSON.stringify(newCart));
-        }
-    },
-    {deep: true}
-);
+export const agregarProductoSupplier = (producto) => {
+    const productoExistente = carritoSupplier.find((item) => item.producto.id === producto.id);
 
-const showAlertMessage = (message) => {
-    alertMessageSp.value = message;
-    showAlertSp.value = true;
-    setTimeout(() => {
-        showAlertSp.value = false;
-    }, 3000);
-};
-
-const addToCartSp = (product) => {
-    const existingProduct = cartSp.value.find((item) => item.id === product.id);
-    if (existingProduct) {
-        modalProductSp.value = {...existingProduct};
-        showModalSp.value = true;
-    } else {
-        cartSp.value.push({...product});
-        showAlertMessage("Producto agregado al carrito");
+    if (!productoExistente) {
+        carritoSupplier.push({
+            producto: {
+                id: producto.id,
+                name: producto.name,
+                photo: producto.photo,
+            },
+            medidas: [
+                {
+                    unitOfMeasure: "",
+                    price: "",
+                },
+            ],
+        });
     }
 };
 
-const updateCartProductSp = () => {
-    const index = cartSp.value.findIndex((item) => item.id === modalProductSp.value.id);
+export const quitarProductoSupplier = (productoId) => {
+    const index = carritoSupplier.findIndex((item) => item.producto.id === productoId);
     if (index !== -1) {
-        cartSp.value[index] = {...modalProductSp.value};
-        showAlertMessage("Producto actualizado en el carrito");
-    }
-    showModalSp.value = false;
-};
-
-const removeFromCartSp = (productId) => {
-    cartSp.value = cartSp.value.filter((item) => item.id !== productId);
-    showAlertMessage("Producto eliminado del carrito");
-};
-
-const incrementQuantitySp = (item) => {
-    item.quantity++;
-};
-
-const decrementQuantitySp = (item) => {
-    if (item.quantity > 1) {
-        item.quantity--;
+        carritoSupplier.splice(index, 1);
     }
 };
 
-const uniqueProductsCountSp = computed(() => {
-    const uniqueProductIds = new Set();
-    cartSp.value.forEach((item) => {
-        uniqueProductIds.add(item.id);
-    });
-    return uniqueProductIds.size;
-});
+export const updateProductoSupplier = (productoId, medidaIndex, key, value) => {
+    const producto = carritoSupplier.find((item) => item.producto.id === productoId);
+    if (producto) {
+        producto.medidas[medidaIndex][key] = value;
+    }
+};
 
-export {cartSp, showModalSp, modalProductSp, alertMessageSp, showAlertSp, addToCartSp, updateCartProductSp, removeFromCartSp, incrementQuantitySp, decrementQuantitySp, uniqueProductsCountSp};
+export const agregarMedidaSupplier = (productoId) => {
+    const producto = carritoSupplier.find((item) => item.producto.id === productoId);
+    if (producto) {
+        producto.medidas.push({
+            unitOfMeasure: "",
+            price: "",
+        });
+    }
+};
+
+export const quitarMedidaSupplier = (productoId, medidaIndex) => {
+    const producto = carritoSupplier.find((item) => item.producto.id === productoId);
+    if (producto && producto.medidas.length > 1) {
+        producto.medidas.splice(medidaIndex, 1);
+    }
+};
+
+export const obtenerCarritoSupplier = () => {
+    return carritoSupplier;
+};
+
+export const totalProductosSeleccionadosSupplier = () => {
+    return carritoSupplier.length;
+};

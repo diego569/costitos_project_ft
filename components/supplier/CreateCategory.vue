@@ -2,6 +2,7 @@
     import {ref} from "vue";
     import {Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot} from "@headlessui/vue";
     import {fetchWithAuth} from "@/services/auth";
+    import {apiurl} from "~/services/api.js";
 
     const props = defineProps({
         showModal: Boolean,
@@ -15,11 +16,10 @@
         if (!categoryName.value.trim()) return;
 
         try {
-            const response = await fetchWithAuth("http://localhost:8000/api/supplier/misproductos/categories", "POST", {
+            const response = await fetchWithAuth(apiurl("//supplier/misproductos/categories"), "POST", {
                 name: categoryName.value,
             });
 
-            // Asume que fetchWithAuth devuelve los datos directamente
             if (response && response.category) {
                 if (typeof props.onCategoryCreated === "function") {
                     props.onCategoryCreated(response.category);

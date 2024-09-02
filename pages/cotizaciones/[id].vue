@@ -2,6 +2,7 @@
     import {ref, onMounted, computed} from "vue";
     import {useRoute} from "vue-router";
     import {getCart, fetchWithAuth} from "@/services/auth";
+    import {apiurl} from "~/services/api.js";
 
     const route = useRoute();
     const quotation = ref(null);
@@ -12,7 +13,7 @@
 
     const fetchQuotationById = async (quotationId) => {
         try {
-            const data = await fetchWithAuth(`http://localhost:8000/api/user/cotizaciones/quotationdatails/${quotationId}`, "GET");
+            const data = await fetchWithAuth(apiurl(`/user/cotizaciones/quotationdatails/${quotationId}`), "GET");
             quotation.value = data.data;
             quotationName.value = data.name;
             formattedDate.value = data.formattedDate;
@@ -98,7 +99,7 @@
         const quotationId = route.params.id;
 
         try {
-            await fetchWithAuth(`http://localhost:8000/api/user/cotizaciones/quotationdatails/${quotationId}`, "PUT", {name: newQuotationName.value});
+            await fetchWithAuth(apiurl(`/user/cotizaciones/quotationdatails/${quotationId}`), "PUT", {name: newQuotationName.value});
             quotationName.value = newQuotationName.value;
             closeModal();
         } catch (err) {

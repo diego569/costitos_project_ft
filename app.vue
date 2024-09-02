@@ -5,6 +5,7 @@
     import {sendQuotationRequest} from "~/services/quotation";
     import {showMenu} from "@/services/menuService";
     import {getUserId, getToken} from "@/services/auth";
+    import {apiurl} from "~/services/api.js";
 
     const showQuoteModal = ref(false);
     const numberOfSuppliers = ref(3);
@@ -92,7 +93,7 @@
 
             console.table(products);
 
-            const response = await fetch(`http://localhost:8000/api/theproducts/${userId.value}/`, {
+            const response = await fetch(apiurl(`//theproducts/${userId.value}/`), {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -125,8 +126,8 @@
                     <NuxtPage class="grid min-w-[360px]" />
                 </div>
                 <div v-if="showMenu" :class="['sticky top-20 hidden max-h-[calc(100vh_-_100px)] items-start justify-center rounded-lg bg-white shadow-sm lg:flex lg:flex-col', showMenu ? 'col-span-2' : '']">
-                    <Carrito v-if="userRole !== 'supplier'" />
-                    <CarritoSupplier v-else />
+                    <UserCart v-if="userRole !== 'supplier'" />
+                    <SupplierCart v-else />
                 </div>
             </div>
         </NuxtLayout>

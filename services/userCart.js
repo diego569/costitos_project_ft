@@ -1,85 +1,67 @@
-import {ref, computed, watch} from "vue";
+import {reactive, watchEffect} from "vue";
 
-const cartUr = ref([]);
-const showModalUr = ref(false);
-const modalProductUr = ref(null);
-const alertMessageUr = ref("");
-const showAlertUr = ref(false);
+const isBrowser = typeof window !== "undefined";
 
-const isLocalStorageAvailable = () => {
-    try {
-        const test = "__localStorageTest__";
-        localStorage.setItem(test, test);
-        localStorage.removeItem(test);
-        return true;
-    } catch (e) {
-        return false;
-    }
-};
+// Leer carrito de localStorage al iniciar
+const carrito = reactive(isBrowser ? JSON.parse(localStorage.getItem("carrito") || "[]") : []);
 
-if (isLocalStorageAvailable()) {
-    cartUr.value = JSON.parse(localStorage.getItem("userCart")) || [];
+// Guardar carrito en localStorage cada vez que cambie
+if (isBrowser) {
+    watchEffect(() => {
+        localStorage.setItem("carrito", JSON.stringify(carrito));
+    });
 }
 
-watch(
-    cartUr,
-    (newCart) => {
-        if (isLocalStorageAvailable()) {
-            localStorage.setItem("userCart", JSON.stringify(newCart));
-        }
-    },
-    {deep: true}
-);
+export const agregarProducto = (producto, medidaSeleccionada) => {
+    const productoExistente = carrito.find((item) => item.producto.id === producto.id && item.producto.unitOfMeasure === medidaSeleccionada.unitOfMeasure);
 
-const showAlertMessage = (message) => {
-    alertMessageUr.value = message;
-    showAlertUr.value = true;
-    setTimeout(() => {
-        showAlertUr.value = false;
-    }, 3000);
-};
-
-const addToCartUr = (product) => {
-    const existingProduct = cartUr.value.find((item) => item.id === product.id);
-    if (existingProduct) {
-        modalProductUr.value = {...existingProduct};
-        showModalUr.value = true;
+    if (productoExistente) {
+        productoExistente.cantidad += 1;
     } else {
-        cartUr.value.push({...product});
-        showAlertMessage("Producto agregado al carrito");
+        carrito.push({
+            producto: {
+                ...producto,
+                unitOfMeasure: medidaSeleccionada.unitOfMeasure,
+            },
+            cantidad: 1,
+        });
     }
 };
 
-const updateCartProductUr = () => {
-    const index = cartUr.value.findIndex((item) => item.id === modalProductUr.value.id);
+export const quitarProducto = (productoId, unitOfMeasure) => {
+    const index = carrito.findIndex((item) => item.producto.id === productoId && item.producto.unitOfMeasure === unitOfMeasure);
     if (index !== -1) {
-        cartUr.value[index] = {...modalProductUr.value};
-        showAlertMessage("Producto actualizado en el carrito");
-    }
-    showModalUr.value = false;
-};
-
-const removeFromCartUr = (productId) => {
-    cartUr.value = cartUr.value.filter((item) => item.id !== productId);
-    showAlertMessage("Producto eliminado del carrito");
-};
-
-const incrementQuantityUr = (item) => {
-    item.quantity++;
-};
-
-const decrementQuantityUr = (item) => {
-    if (item.quantity > 1) {
-        item.quantity--;
+        carrito.splice(index, 1);
     }
 };
 
-const uniqueProductsCountUr = computed(() => {
-    const uniqueProductIds = new Set();
-    cartUr.value.forEach((item) => {
-        uniqueProductIds.add(item.id);
-    });
-    return uniqueProductIds.size;
-});
+export const incrementarCantidad = (productoId, unitOfMeasure) => {
+    const producto = carrito.find((item) => item.producto.id === productoId && item.producto.unitOfMeasure === unitOfMeasure);
+    if (producto) {
+        producto.cantidad += 1;
+    }
+};
 
-export {cartUr, showModalUr, modalProductUr, alertMessageUr, showAlertUr, addToCartUr, updateCartProductUr, removeFromCartUr, incrementQuantityUr, decrementQuantityUr, uniqueProductsCountUr};
+export const decrementarCantidad = (productoId, unitOfMeasure) => {
+    const producto = carrito.find((item) => item.producto.id === productoId && item.producto.unitOfMeasure === unitOfMeasure);
+    if (producto && producto.cantidad > 1) {
+        producto.cantidad -= 1;
+    }
+};
+
+export const updateCantidad = (productoId, unitOfMeasure, cantidad) => {
+    const producto = carrito.find((item) => item.producto.id === productoId && item.producto.unitOfMeasure === unitOfMeasure);
+    if (producto && cantidad >= 1) {
+        producto.cantidad = cantidad;
+    } else if (producto && cantidad < 1) {
+        producto.cantidad = 1;
+    }
+};
+
+export const obtenerCarrito = () => {
+    return carrito;
+};
+
+export const totalProductosSeleccionados = () => {
+    return carrito.reduce((total, item) => total + item.cantidad, 0);
+};

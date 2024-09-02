@@ -3,6 +3,7 @@
     import {fetchWithAuth} from "@/services/auth";
     import {uploadImage, createProduct, createSupplierProduct} from "@/services/productService";
     import {TransitionRoot, TransitionChild, Dialog, DialogPanel, DialogTitle} from "@headlessui/vue";
+    import {apiurl} from "~/services/api.js";
 
     const props = defineProps({
         showModal: Boolean,
@@ -16,10 +17,7 @@
         description: "",
         subcategoryId: props.subcategoryId || "",
     });
-    const supplierProduct = ref({
-        price: 0,
-        unitOfMeasure: "",
-    });
+
     const file = ref(null);
     const preview = ref(null);
     const message = ref("");
@@ -32,7 +30,7 @@
 
     const fetchCategories = async () => {
         try {
-            const response = await fetchWithAuth("http://localhost:8000/api/supplier/misproductos/getcategories", "GET");
+            const response = await fetchWithAuth(apiurl("/supplier/misproductos/getcategories"), "GET");
             categories.value = response.data;
 
             if (!props.categoryId && categories.value.length > 0) {
@@ -46,7 +44,7 @@
 
     const fetchSubcategories = async (categoryId) => {
         try {
-            const response = await fetchWithAuth(`http://localhost:8000/api/supplier/misproductos/getsubcategoriesbycategory/${categoryId}`, "GET");
+            const response = await fetchWithAuth(apiurl(`/supplier/misproductos/getsubcategoriesbycategory/${categoryId}`), "GET");
             subcategories.value = response.data;
 
             if (!props.subcategoryId && subcategories.value.length > 0) {
@@ -164,6 +162,30 @@
         subcategories.value.push(newSubcategory);
         selectedSubcategoryId.value = newSubcategory.id;
     };
+
+    const unitOfMeasures = [
+        {id: "kg", name: "kg (Kilogramos)"},
+        {id: "g", name: "g (Gramos)"},
+        {id: "lb", name: "lb (Libras)"},
+        {id: "oz", name: "oz (Onzas)"},
+        {id: "L", name: "L (Litros)"},
+        {id: "ml", name: "ml (Mililitros)"},
+        {id: "gal", name: "gal (Galones)"},
+        {id: "fl oz", name: "fl oz (Onzas líquidas)"},
+        {id: "m", name: "m (Metros)"},
+        {id: "cm", name: "cm (Centímetros)"},
+        {id: "mm", name: "mm (Milímetros)"},
+        {id: "in", name: "in (Pulgadas)"},
+        {id: "ft", name: "ft (Pies)"},
+        {id: "u", name: "u (Unidad)"},
+        {id: "pkg", name: "pkg (Paquete)"},
+        {id: "doz", name: "doz (Docena)"},
+    ];
+
+    const supplierProduct = ref({
+        price: "",
+        unitOfMeasure: unitOfMeasures[0].id,
+    });
 </script>
 <template>
     <TransitionRoot appear :show="showModal" as="template">
@@ -181,7 +203,7 @@
                             <div class="mt-2">
                                 <div class="mb-4">
                                     <div class="mb-4">
-                                        <Label forId="" text="Imagen del Producto:" />
+                                        <UiLabel forId="" text="Imagen del Producto:" />
                                         <div
                                             @drop.prevent="handleDrop"
                                             @dragover.prevent="handleDragOver"
@@ -206,27 +228,24 @@
                                     </div>
                                     <div class="mb-4 grid gap-4 sm:grid-cols-2">
                                         <div class="sm:col-span-2">
-                                            <Label forId="name" text="Nombre del producto:" />
-                                            <Input id="name" v-model="product.name" type="text" placeholder="Escribe el nombre del producto" required />
+                                            <UiLabel forId="name" text="Nombre del producto:" />
+                                            <UiInput id="name" v-model="product.name" type="text" placeholder="Escribe el nombre del producto" required />
                                         </div>
 
                                         <div>
-                                            <Label forId="price" text="Precio:" />
-                                            <Input id="price" v-model="supplierProduct.price" type="number" placeholder="Escribe el precio" required />
+                                            <UiLabel forId="price" text="Precio:" />
+                                            <UiInput id="price" v-model="supplierProduct.price" type="text" placeholder="Escribe el precio" oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');" required />
                                         </div>
 
                                         <div>
-                                            <Label forId="unitOfMeasure" text="Unidad de medida:" />
-                                            <Input id="unitOfMeasure" v-model="supplierProduct.unitOfMeasure" type="text" placeholder="Unidad de medida" required />
+                                            <UiLabel forId="unitOfMeasure" text="Unidad de medida:" />
+                                            <UiSelect id="unitOfMeasure" v-model="supplierProduct.unitOfMeasure" :options="unitOfMeasures" required />
                                         </div>
 
                                         <div>
-                                            <Label forId="category-select" text="Seleccione Categoría:" />
-                                            <select v-model="selectedCategoryId" id="category-select" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500">
-                                                <option v-for="category in categories" :key="category.id" :value="category.id">
-                                                    {{ category.name }}
-                                                </option>
-                                            </select>
+                                            <UiLabel forId="category-select" text="Seleccione Categoría:" />
+                                            <UiSelect id="category-select" v-model="selectedCategoryId" :options="categories" required />
+
                                             <div @click="openCreateCategoryModal" class="mt-2 cursor-pointer text-primary-600 hover:text-primary-800">
                                                 <p class="select-none font-sans text-xs font-normal leading-normal antialiased">Crear nueva categoría</p>
                                             </div>
@@ -234,12 +253,10 @@
                                         </div>
 
                                         <div v-if="selectedCategoryId && subcategories.length > 0">
-                                            <Label forId="subcategory-select" text="Seleccione Subcategoría:" />
-                                            <select v-model="selectedSubcategoryId" id="subcategory-select" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500">
-                                                <option v-for="subcategory in subcategories" :key="subcategory.id" :value="subcategory.id">
-                                                    {{ subcategory.name }}
-                                                </option>
-                                            </select>
+                                            <UiLabel forId="subcategory-select" text="Seleccione Subcategoría:" />
+
+                                            <UiSelect id="subcategory-select" v-model="selectedSubcategoryId" :options="subcategories" required />
+
                                             <div @click="openCreateSubcategoryModal" class="mt-2 cursor-pointer text-primary-600 hover:text-primary-800">
                                                 <p class="select-none font-sans text-xs font-normal leading-normal antialiased">Crear nueva subcategoría</p>
                                             </div>
@@ -252,7 +269,7 @@
                                             <SupplierCreateSubcategory :showModal="showCreateSubcategoryModal" :closeModal="closeCreateSubcategoryModal" :categoryId="selectedCategoryId" :onSubcategoryCreated="handleSubcategoryCreated" />
                                         </div>
                                         <div class="sm:col-span-2">
-                                            <Label forId="description" text="Descripción:" />
+                                            <UiLabel forId="description" text="Descripción:" />
                                             <textarea
                                                 v-model="product.description"
                                                 id="description"

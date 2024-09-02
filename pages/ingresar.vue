@@ -1,6 +1,7 @@
 <script setup>
     import {ref, onMounted} from "vue";
     import {useRouter} from "vue-router";
+    import {login} from "@/services/auth";
 
     const user = ref(null);
     const credentials = ref({
@@ -11,46 +12,18 @@
     const router = useRouter();
 
     onMounted(() => {
-        // Verificar si el usuario está autenticado al cargar el componente
         const userData = localStorage.getItem("userData");
         if (userData) {
             user.value = JSON.parse(userData);
-            // Redirigir a la página principal si el usuario ya está autenticado
             router.push({name: "index"});
         }
     });
 
-    const login = async () => {
-        try {
-            const response = await fetch("http://localhost:8000/api/auth/ingresar/login", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(credentials.value),
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message);
-            }
-
-            const data = await response.json();
-            localStorage.setItem("userData", JSON.stringify(data.data));
-            localStorage.setItem("token", data.token);
-            error.value = "";
-
-            const previousRoute = localStorage.getItem("previousRoute");
-            if (previousRoute) {
-                router.push(previousRoute);
-            } else {
-                router.push({name: "index"});
-            }
-        } catch (err) {
-            error.value = err.message;
-        }
+    const handleLogin = () => {
+        login(credentials.value, error);
     };
 </script>
+
 <template>
     <div class="flex h-screen">
         <div class="flex w-full items-center justify-center bg-gray-100 lg:w-2/5">
@@ -66,14 +39,14 @@
                             <LogosTexto class="h-4 w-auto" />
                         </a>
                     </div>
-                    <form @submit.prevent="login">
+                    <form @submit.prevent="handleLogin">
                         <div class="mb-4">
-                            <label for="email" class="block text-gray-700">Email</label>
-                            <input v-model="credentials.email" type="email" id="email" class="mt-2 w-full rounded border px-3 py-2 focus:border-blue-300 focus:outline-none focus:ring" required />
+                            <UiLabel forId="email" text="Email" />
+                            <UiInput id="email" type="email" v-model="credentials.email" placeholder="Ingrese su email" required />
                         </div>
                         <div class="mb-6">
-                            <label for="password" class="block text-gray-700">Contraseña</label>
-                            <input v-model="credentials.password" type="password" id="password" class="mt-2 w-full rounded border px-3 py-2 focus:border-blue-300 focus:outline-none focus:ring" required />
+                            <UiLabel forId="password" text="Contraseña" />
+                            <UiInput id="password" type="password" v-model="credentials.password" placeholder="Ingrese su contraseña" required />
                         </div>
                         <button type="submit" class="w-full rounded-lg bg-orange-500 py-2 text-white hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-600 focus:ring-opacity-50">Iniciar sesión</button>
                         <p v-if="error" class="mt-4 text-center text-red-500">{{ error }}</p>
@@ -89,5 +62,3 @@
         </div>
     </div>
 </template>
-
-<style scoped></style>

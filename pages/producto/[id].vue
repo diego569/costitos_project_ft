@@ -1,6 +1,7 @@
 <script setup>
     import {ref, onMounted} from "vue";
     import {useRoute} from "vue-router";
+    import {apiurl} from "~/services/api.js";
 
     const product = ref(null);
     const route = useRoute();
@@ -11,7 +12,7 @@
     };
     const fetchProductById = async (id) => {
         try {
-            const response = await fetch(`http://localhost:8000/api/product/byId/${id}`);
+            const response = await fetch(apiurl(`/product/byId/${id}`));
             if (!response.ok) {
                 throw new Error("Failed to fetch product details");
             }

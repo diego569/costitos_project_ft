@@ -18,12 +18,13 @@
 
 <script setup>
     import {ref, onMounted} from "vue";
+    import {apiurl} from "~/services/api.js";
 
     const products = ref([]);
 
     const fetchProducts = async () => {
         try {
-            const response = await fetch("http://localhost:8000/api/product/all/");
+            const response = await fetch(apiurl("/product/all/"));
             const data = await response.json();
             products.value = data;
         } catch (error) {
