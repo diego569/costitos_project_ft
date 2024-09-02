@@ -1,15 +1,15 @@
 <script setup>
     import {ref, computed} from "vue";
-    import {obtenerCarrito, quitarProducto, incrementarCantidad, decrementarCantidad, totalProductosSeleccionados, updateCantidad} from "~/services/carrito.js";
+    import {obtenerCarrito, quitarProducto, incrementarCantidad, decrementarCantidad, totalProductosSeleccionados, updateCantidad} from "~/services/usercart.js";
     import {useRouter} from "vue-router";
     import {showMenu} from "@/services/menuService";
-    import {getUserId, fetchWithAuth} from "@/services/auth"; // Importar funciones de auth.js
+    import {getUserId, fetchWithAuth} from "@/services/auth";
+    import {apiurl} from "~/services/api.js";
 
     const router = useRouter();
 
     const carrito = computed(() => obtenerCarrito());
-    const totalProductos = computed(() => totalProductosSeleccionados());
-
+    const totalProductos = computed(() => carrito.value.length);
     const userId = getUserId();
     const quotationData = ref({
         userId,
@@ -23,7 +23,7 @@
 
     const createQuotation = async () => {
         try {
-            const {quotationId, quotationNumber} = await fetchWithAuth("http://localhost:8000/api/user/carrito/createquotation", "POST", quotationData.value);
+            const {quotationId, quotationNumber} = await fetchWithAuth(apiurl("/user/carrito/createquotation"), "POST", quotationData.value);
 
             console.log("Cotización creada con ID:", quotationId, "y Número de Cotización:", quotationNumber);
             await addProductsToQuotation(quotationId);
@@ -42,7 +42,7 @@
 
             console.log("Añadiendo productos a la cotización:", quotationId, products);
 
-            const {quotationProducts} = await fetchWithAuth("http://localhost:8000/api/user/carrito/addproductstoquotation", "POST", {quotationId, products});
+            const {quotationProducts} = await fetchWithAuth(apiurl("/user/carrito/addproductstoquotation"), "POST", {quotationId, products});
 
             console.log("Productos agregados a la cotización:", quotationProducts);
             await addQuotationSupplierProducts(quotationId, quotationProducts);
@@ -53,7 +53,7 @@
 
     const addQuotationSupplierProducts = async (quotationId, quotationProducts) => {
         try {
-            const data = await fetchWithAuth("http://localhost:8000/api/user/carrito/addquotationsupplierproducts", "POST", {
+            const data = await fetchWithAuth(apiurl("/user/carrito/addquotationsupplierproducts"), "POST", {
                 quotationProducts,
                 quotationCount: supplierCount.value,
             });
@@ -93,8 +93,7 @@
                         <div class="flex w-full flex-row items-end gap-2">
                             <div class="flex items-center gap-2 md:max-w-[150px]">
                                 <button @click="decrementarCantidad(item.producto.id, item.producto.unitOfMeasure)" class="flex aspect-square size-10 items-center justify-center rounded-lg bg-gray-200 px-4 text-gray-700">-</button>
-                                <Input type="text" class="text-center" v-model.number="item.cantidad" @change="updateCantidad(item.producto.id, item.producto.unitOfMeasure, item.cantidad)" oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');" />
-
+                                <UiInput type="text" class="text-center" v-model.number="item.cantidad" @change="updateCantidad(item.producto.id, item.producto.unitOfMeasure, item.cantidad)" oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');" />
                                 <button @click="incrementarCantidad(item.producto.id, item.producto.unitOfMeasure)" class="flex aspect-square size-10 items-center justify-center rounded-lg bg-gray-200 px-4 text-gray-700">+</button>
                             </div>
                         </div>

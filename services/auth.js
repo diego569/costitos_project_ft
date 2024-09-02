@@ -1,3 +1,5 @@
+import {apiurl} from "~/services/api.js";
+
 export const isLocalStorageAvailable = () => {
     try {
         const test = "__localStorageTest__";
@@ -34,7 +36,7 @@ export const getUserName = () => {
 
 export const logout = async (router) => {
     try {
-        const response = await fetch("http://localhost:8000/api/auth/salir/logout", {
+        const response = await fetch(apiurl("/auth/salir/logout"), {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -85,7 +87,7 @@ export const fetchWithAuth = async (url, method, body) => {
 // Nueva función login
 export async function login(credentials, error) {
     try {
-        const response = await fetch("http://localhost:8000/api/auth/ingresar/login", {
+        const response = await fetch(apiurl("/auth/ingresar/login"), {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

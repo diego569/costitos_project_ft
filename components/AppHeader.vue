@@ -2,6 +2,7 @@
     import {useRouter} from "vue-router";
     import {Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems} from "@headlessui/vue";
     import {Bars3Icon, BellIcon, XMarkIcon, UserIcon, ShoppingCartIcon, RectangleGroupIcon, UserGroupIcon} from "@heroicons/vue/24/outline";
+    import {apiurl} from "~/services/api.js";
 
     const user = ref(null);
     const router = useRouter();
@@ -13,7 +14,7 @@
 
     const logout = async () => {
         try {
-            const response = await fetch("http://localhost:8000/api/auth/salir/logout", {
+            const response = await fetch(apiurl("/auth/salir/logout"), {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

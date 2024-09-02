@@ -1,8 +1,9 @@
-// service.js
+import {apiurl} from "~/services/api.js";
+
 export const sendQuotationRequest = async (quotation, cart) => {
     console.log(quotation);
     try {
-        const response = await fetch("http://localhost:8000/api/quotation", {
+        const response = await fetch(apiurl("/quotation"), {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -35,7 +36,7 @@ const addProductsToQuotation = async (quotationId, cart) => {
 
         console.table("Datos que se envían a la API:", products);
 
-        const response = await fetch(`http://localhost:8000/api/quotation/${quotationId}/`, {
+        const response = await fetch(apiurl(`/quotation/${quotationId}/`), {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -61,7 +62,7 @@ const addProductsToQuotation = async (quotationId, cart) => {
 
 const getPricesFromSuppliers = async (quotationId, qpIds) => {
     try {
-        const pricesResponse = await fetch(`http://localhost:8000/api/quotation/products/prices`, {
+        const pricesResponse = await fetch(apiurl(`/quotation/products/prices`), {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -87,7 +88,7 @@ const getPricesFromSuppliers = async (quotationId, qpIds) => {
 
 const createSupplierProducts = async (quotationId, pricesData) => {
     try {
-        const supplierProductsResponse = await fetch("http://localhost:8000/api/quotation3/supplier-products", {
+        const supplierProductsResponse = await fetch(apiurl("/quotation3/supplier-products"), {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

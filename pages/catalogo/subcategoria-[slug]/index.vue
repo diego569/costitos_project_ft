@@ -1,7 +1,7 @@
 <script setup>
     import {ref, onMounted} from "vue";
     import {useRoute} from "vue-router";
-    import {agregarProducto} from "~/services/carrito.js";
+    import {agregarProducto} from "~/services/usercart";
 
     const route = useRoute();
     const subcategorySlug = route.params.slug;
@@ -19,6 +19,7 @@
     const isLoadingMostQuotedProducts = ref(true);
     const isSearching = ref(false);
     const noResultsFound = ref(false);
+    import {apiurl} from "~/services/api.js";
 
     const agregarAlCarrito = (producto) => {
         agregarProducto(producto, {supplierProductId: producto.id, unitOfMeasure: producto.unitOfMeasure});
@@ -30,7 +31,7 @@
 
     const fetchSubcategoryDetails = async () => {
         try {
-            const response = await fetch(`http://localhost:8000/api/guest/subcategoria/getsubcategorydetailsbyslug/${subcategorySlug}`);
+            const response = await fetch(apiurl(`/guest/subcategoria/getsubcategorydetailsbyslug/${subcategorySlug}`));
             if (!response.ok) throw new Error("Failed to fetch subcategory details");
 
             const data = await response.json();
@@ -44,7 +45,7 @@
 
     const fetchRecentProducts = async () => {
         try {
-            const response = await fetch(`http://localhost:8000/api/guest/subcategoria/getrecentsupplierproductsbysubcategory/${subcategorySlug}`);
+            const response = await fetch(apiurl(`/guest/subcategoria/getrecentsupplierproductsbysubcategory/${subcategorySlug}`));
             if (!response.ok) throw new Error("Failed to fetch recent products");
 
             const data = await response.json();
@@ -58,7 +59,7 @@
 
     const fetchMostQuotedProducts = async () => {
         try {
-            const response = await fetch(`http://localhost:8000/api/guest/subcategoria/getmostquotedproductsbysubcategory/${subcategorySlug}`);
+            const response = await fetch(apiurl(`/guest/subcategoria/getmostquotedproductsbysubcategory/${subcategorySlug}`));
             if (!response.ok) throw new Error("Failed to fetch most quoted products");
 
             const data = await response.json();
@@ -82,7 +83,7 @@
         noResultsFound.value = false;
 
         try {
-            const response = await fetch(`http://localhost:8000/api/guest/subcategoria/searchsupplierproductsbysubcategory/${subcategorySlug}?query=${searchQuery.value}`);
+            const response = await fetch(apiurl(`/guest/subcategoria/searchsupplierproductsbysubcategory/${subcategorySlug}?query=${searchQuery.value}`));
             if (!response.ok) throw new Error("Failed to search products");
 
             const data = await response.json();
@@ -145,17 +146,25 @@
             <span class="bg-gradient-to-r from-yellow-400 to-primary-600 bg-clip-text text-transparent"> {{ subcategoryName }}</span>
         </h1>
         <div class="relative w-full max-w-md">
-            <Input type="text" v-model="searchQuery" @input="searchProducts" placeholder="Buscar en subcategoria..." class="mb-4 w-full rounded border p-2" />
+            <UiInput type="text" v-model="searchQuery" @input="searchProducts" placeholder="Buscar en subcategoria..." class="mb-4 w-full rounded border p-2" />
         </div>
     </div>
 
-    <Main v-if="searchQuery">
-        <div v-if="isSearching">
+    <div v-if="searchQuery">
+        <Main v-if="isSearching">
             <ProductCardSkeleton v-for="n in 6" :key="n" />
+        </Main>
+        <div v-else-if="noResultsFound" class="p-4 text-center text-gray-500">
+            No se encontró ningún producto llamado <span class="font-semibold"> {{ searchQuery }} </span>
         </div>
-        <div v-else-if="noResultsFound" class="text-center text-gray-500">No se encontró ningún producto.</div>
-        <UserProductCard v-else :products="searchResults" @agregar="agregarAlCarrito" :updatePrice="updatePrice" />
-    </Main>
+
+        <Main v-else>
+            <p class="col-span-full p-4 text-center text-gray-500">
+                Productos encontrados para <span class="font-semibold"> {{ searchQuery }} </span>
+            </p>
+            <UserProductCard :products="searchResults" @agregar="agregarAlCarrito" :updatePrice="updatePrice" />
+        </Main>
+    </div>
     <hr />
 
     <div>

@@ -20,13 +20,14 @@
 <script setup>
     import {ref, onMounted} from "vue";
     import {useRouter} from "vue-router";
+    import {apiurl} from "~/services/api.js";
 
     const categories = ref([]);
     const router = useRouter();
 
     const fetchCategories = async () => {
         try {
-            const response = await fetch("http://localhost:8000/api/category/all");
+            const response = await fetch(apiurl("/category/all"));
             if (!response.ok) {
                 throw new Error("Failed to fetch categories");
             }

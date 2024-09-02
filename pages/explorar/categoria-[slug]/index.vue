@@ -1,10 +1,12 @@
 <script setup>
     import {ref, onMounted} from "vue";
     import {useRoute} from "vue-router";
-    import {agregarProductoSupplier, obtenerCarritoSupplier} from "~/services/carritosupplier.js";
+    import {agregarProductoSupplier, obtenerCarritoSupplier} from "~/services/suppliercart";
+    import {apiurl} from "~/services/api.js";
 
     const route = useRoute();
     const categorySlug = route.params.slug;
+    const categoryName = ref("");
 
     const subcategories = ref([]);
     const searchQuery = ref("");
@@ -22,9 +24,21 @@
         console.log("Selected product", product.id);
     };
 
+    const fetchCategoryName = async () => {
+        try {
+            const response = await fetch(apiurl(`/guest/categoria/getcategorynamebyslug/${categorySlug}`));
+            if (!response.ok) throw new Error("Failed to fetch category name");
+
+            const data = await response.json();
+            categoryName.value = data.category.name;
+        } catch (error) {
+            console.error("Error fetching category name:", error);
+        }
+    };
+
     const fetchSubcategories = async () => {
         try {
-            const response = await fetch(`http://localhost:8000/api/supplier/categoria/getsubcategoriesbycategoryslug/${categorySlug}`);
+            const response = await fetch(apiurl(`/supplier/categoria/getsubcategoriesbycategoryslug/${categorySlug}`));
             if (!response.ok) throw new Error("Failed to fetch subcategories");
 
             const data = await response.json();
@@ -38,7 +52,7 @@
 
     const fetchRecentProducts = async () => {
         try {
-            const response = await fetch(`http://localhost:8000/api/supplier/categoria/getrecentproductsbycategory/${categorySlug}`);
+            const response = await fetch(apiurl(`/supplier/categoria/getrecentproductsbycategory/${categorySlug}`));
             if (!response.ok) throw new Error("Failed to fetch recent products");
 
             const data = await response.json();
@@ -58,7 +72,7 @@
 
         try {
             isLoadingSearchResults.value = true;
-            const response = await fetch(`http://localhost:8000/api/supplier/categoria/searchrecentproductsbycategory/${categorySlug}?query=${searchQuery.value}`);
+            const response = await fetch(apiurl(`/supplier/categoria/searchrecentproductsbycategory/${categorySlug}?query=${searchQuery.value}`));
             if (!response.ok) throw new Error("Failed to search products");
 
             const data = await response.json();
@@ -71,12 +85,61 @@
     };
 
     onMounted(() => {
+        fetchCategoryName();
         fetchSubcategories();
         fetchRecentProducts();
     });
 </script>
 <template>
-    <div>
+    <nav class="flex" aria-label="Breadcrumb">
+        <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
+            <li class="inline-flex items-center">
+                <NuxtLink to="/explorar" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-primary-600">
+                    <svg class="me-2.5 h-3 w-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z" />
+                    </svg>
+                    Inicio
+                </NuxtLink>
+            </li>
+            <li v-if="categorySlug">
+                <div class="flex items-center">
+                    <svg class="mx-1 h-3 w-3 text-gray-400 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4" />
+                    </svg>
+                    <div class="ms-1 text-sm font-medium text-gray-700 md:ms-2">
+                        {{ categoryName }}
+                    </div>
+                </div>
+            </li>
+        </ol>
+    </nav>
+    <div class="flex flex-col items-center justify-center space-y-4 px-3 py-8 md:py-12 xl:py-16">
+        <h1 class="mb-4 text-center text-2xl font-extrabold text-gray-900 md:text-4xl lg:text-5xl">
+            <span class="bg-gradient-to-r from-yellow-400 to-primary-600 bg-clip-text text-transparent">{{ categoryName }}</span>
+        </h1>
+        <div class="relative w-full max-w-md">
+            <UiInput type="text" v-model="searchQuery" @input="searchProducts" placeholder="Buscar en categoria..." class="mb-4 w-full rounded border p-2" />
+        </div>
+    </div>
+
+    <div v-if="searchQuery">
+        <Main v-if="isSearching">
+            <ProductCardSkeleton v-for="n in 6" :key="n" />
+        </Main>
+        <div v-else-if="noResultsFound" class="p-4 text-center text-gray-500">
+            No se encontró ningún producto llamado <span class="font-semibold"> {{ searchQuery }} </span>
+        </div>
+
+        <Main v-else>
+            <p class="col-span-full p-4 text-center text-gray-500">
+                Productos encontrados para <span class="font-semibold"> {{ searchQuery }} </span>
+            </p>
+            <UserProductCard :products="searchResults" @agregar="agregarAlCarritoSupplier" :updatePrice="updatePrice" />
+        </Main>
+    </div>
+    <hr />
+
+    <!-- <div>
         <h6 class="p-4 text-xl font-bold">Buscar Productos</h6>
         <input type="text" v-model="searchQuery" @input="searchProducts" placeholder="Buscar productos..." class="mb-4 w-full rounded border p-2" />
         <Main v-if="searchQuery.trim()">
@@ -84,12 +147,12 @@
             <ProductCard2 v-if="searchResults.length" v-for="product in searchResults" :key="product.id" :product="product" :updatePrice="updatePrice" @agregar="agregarAlCarrito" />
             <p v-else>No se encontraron resultados para "{{ searchQuery }}"</p>
         </Main>
-    </div>
+    </div> -->
 
     <div>
         <h6 class="p-4 text-xl font-bold">Subcategorías</h6>
         <Main>
-            <CategoryCard3 v-for="subcategory in subcategories" :key="subcategory.id" :subcategory="subcategory" />
+            <SupplierCategoryCard :items="subcategories" subcategory />
         </Main>
     </div>
 

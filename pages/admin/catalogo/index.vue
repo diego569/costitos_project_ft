@@ -2,6 +2,8 @@
     import {ref, onMounted} from "vue";
     import {TransitionRoot, TransitionChild, Dialog, DialogPanel, DialogTitle} from "@headlessui/vue";
     import {showMenu} from "@/services/menuService";
+    import {apiurl} from "~/services/api.js";
+
     const supplierId = "92c05463-e920-4153-bc38-5c6352701769";
 
     const categories = ref([]);
@@ -22,7 +24,7 @@
 
     const fetchCategoriesBySupplier = async () => {
         try {
-            const response = await fetch(`http://localhost:8000/api/admin/catalogo/getcategoriesbysupplier2/${supplierId}`);
+            const response = await fetch(apiurl(`/admin/catalogo/getcategoriesbysupplier2/${supplierId}`));
             if (!response.ok) throw new Error("Failed to fetch categories");
 
             const data = await response.json();
@@ -36,7 +38,7 @@
 
     const fetchSubcategoriesBySupplierAndCategory = async (categoryId) => {
         try {
-            const response = await fetch(`http://localhost:8000/api/admin/catalogo/getsubcategoriesbysupplierandcategory/${supplierId}/${categoryId}`);
+            const response = await fetch(apiurl(`/admin/catalogo/getsubcategoriesbysupplierandcategory/${supplierId}/${categoryId}`));
             if (!response.ok) throw new Error("Failed to fetch subcategories");
 
             const data = await response.json();
@@ -49,7 +51,7 @@
     const fetchProducts = async () => {
         isLoadingProducts.value = true;
         try {
-            const response = await fetch(`http://localhost:8000/api/admin/catalogo/products`);
+            const response = await fetch(apiurl(`/admin/catalogo/products`));
             if (!response.ok) throw new Error("Failed to fetch products");
 
             const data = await response.json();
@@ -64,7 +66,7 @@
     const fetchProductsBySupplierAndCategory = async (categoryId) => {
         isLoadingProducts.value = true;
         try {
-            const response = await fetch(`http://localhost:8000/api/admin/catalogo/getproductsbycategory/${categoryId}`);
+            const response = await fetch(apiurl(`/admin/catalogo/getproductsbycategory/${categoryId}`));
             if (!response.ok) throw new Error("Failed to fetch products");
 
             const data = await response.json();
@@ -79,7 +81,7 @@
     const fetchProductsBySupplierAndSubcategory = async (subcategoryId) => {
         isLoadingProducts.value = true;
         try {
-            const response = await fetch(`http://localhost:8000/api/admin/catalogo/getproductsbysubcategory/${subcategoryId}`);
+            const response = await fetch(apiurl(`/admin/catalogo/getproductsbysubcategory/${subcategoryId}`));
             if (!response.ok) throw new Error("Failed to fetch products");
 
             const data = await response.json();
@@ -99,7 +101,7 @@
 
         isLoadingDefaultSearchResults.value = true;
         try {
-            const response = await fetch(`http://localhost:8000/api/admin/catalogo/searchproducts?query=${categorySearchQuery.value}`);
+            const response = await fetch(apiurl(`/admin/catalogo/searchproducts?query=${categorySearchQuery.value}`));
             if (!response.ok) throw new Error("Failed to search products");
 
             const data = await response.json();
@@ -119,7 +121,7 @@
 
         isLoadingCategorySearchResults.value = true;
         try {
-            const response = await fetch(`http://localhost:8000/api/admin/catalogo/searchproductsbycategory/${selectedCategory.value}?query=${categorySearchQuery.value}`);
+            const response = await fetch(apiurl(`/admin/catalogo/searchproductsbycategory/${selectedCategory.value}?query=${categorySearchQuery.value}`));
             if (!response.ok) throw new Error("Failed to search products");
 
             const data = await response.json();
@@ -139,7 +141,7 @@
 
         isLoadingSubcategorySearchResults.value = true;
         try {
-            const response = await fetch(`http://localhost:8000/api/admin/catalogo/searchproductsbysubcategory/${selectedSubcategory.value}?query=${subcategorySearchQuery.value}`);
+            const response = await fetch(apiurl(`/admin/catalogo/searchproductsbysubcategory/${selectedSubcategory.value}?query=${subcategorySearchQuery.value}`));
             if (!response.ok) throw new Error("Failed to search products");
 
             const data = await response.json();

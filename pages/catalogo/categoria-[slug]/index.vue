@@ -1,12 +1,12 @@
 <script setup>
     import {ref, onMounted} from "vue";
     import {useRoute} from "vue-router";
-    import {agregarProducto} from "~/services/carrito.js";
+    import {agregarProducto} from "~/services/usercart";
 
     const route = useRoute();
     const categorySlug = route.params.slug;
 
-    const categoryName = ref(""); // Variable para almacenar el nombre de la categoría
+    const categoryName = ref("");
     const subcategories = ref([]);
     const products = ref([]);
     const mostQuotedProducts = ref([]);
@@ -17,6 +17,7 @@
     const isLoadingMostQuotedProducts = ref(true);
     const isSearching = ref(false);
     const noResultsFound = ref(false);
+    import {apiurl} from "~/services/api.js";
 
     const agregarAlCarrito = (producto) => {
         agregarProducto(producto, {supplierProductId: producto.id, unitOfMeasure: producto.unitOfMeasure});
@@ -28,7 +29,7 @@
 
     const fetchCategoryName = async () => {
         try {
-            const response = await fetch(`http://localhost:8000/api/guest/categoria/getcategorynamebyslug/${categorySlug}`);
+            const response = await fetch(apiurl(`/guest/categoria/getcategorynamebyslug/${categorySlug}`));
             if (!response.ok) throw new Error("Failed to fetch category name");
 
             const data = await response.json();
@@ -40,7 +41,7 @@
 
     const fetchSubcategories = async () => {
         try {
-            const response = await fetch(`http://localhost:8000/api/guest/categoria/getsubcategoriesbycategoryslug/${categorySlug}`);
+            const response = await fetch(apiurl(`/guest/categoria/getsubcategoriesbycategoryslug/${categorySlug}`));
             if (!response.ok) throw new Error("Failed to fetch subcategories");
 
             const data = await response.json();
@@ -54,7 +55,7 @@
 
     const fetchRecentProducts = async () => {
         try {
-            const response = await fetch(`http://localhost:8000/api/guest/categoria/getrecentsupplierproductsbycategory/${categorySlug}`);
+            const response = await fetch(apiurl(`/guest/categoria/getrecentsupplierproductsbycategory/${categorySlug}`));
             if (!response.ok) throw new Error("Failed to fetch recent products");
 
             const data = await response.json();
@@ -68,7 +69,7 @@
 
     const fetchMostQuotedProducts = async () => {
         try {
-            const response = await fetch(`http://localhost:8000/api/guest/categoria/getmostquotedproductsbycategory/${categorySlug}`);
+            const response = await fetch(apiurl(`/guest/categoria/getmostquotedproductsbycategory/${categorySlug}`));
             if (!response.ok) throw new Error("Failed to fetch most quoted products");
 
             const data = await response.json();
@@ -92,7 +93,7 @@
         noResultsFound.value = false;
 
         try {
-            const response = await fetch(`http://localhost:8000/api/guest/categoria/searchsupplierproductsbycategory/${categorySlug}?query=${searchQuery.value}`);
+            const response = await fetch(apiurl(`/guest/categoria/searchsupplierproductsbycategory/${categorySlug}?query=${searchQuery.value}`));
             if (!response.ok) throw new Error("Failed to search products");
 
             const data = await response.json();
@@ -146,20 +147,25 @@
             <span class="bg-gradient-to-r from-yellow-400 to-primary-600 bg-clip-text text-transparent">{{ categoryName }}</span>
         </h1>
         <div class="relative w-full max-w-md">
-            <Input type="text" v-model="searchQuery" @input="searchProducts" placeholder="Buscar en categoria..." class="mb-4 w-full rounded border p-2" />
+            <UiInput type="text" v-model="searchQuery" @input="searchProducts" placeholder="Buscar en categoria..." class="mb-4 w-full rounded border p-2" />
         </div>
     </div>
 
-    <Main v-if="searchQuery">
-        <div v-if="isSearching">
+    <div v-if="searchQuery">
+        <Main v-if="isSearching">
             <ProductCardSkeleton v-for="n in 6" :key="n" />
-        </div>
-        <div v-else-if="noResultsFound" class="col-span-full p-4 text-center text-gray-500">
+        </Main>
+        <div v-else-if="noResultsFound" class="p-4 text-center text-gray-500">
             No se encontró ningún producto llamado <span class="font-semibold"> {{ searchQuery }} </span>
         </div>
-        <UserProductCard v-else :products="searchResults" @agregar="agregarAlCarrito" :updatePrice="updatePrice" />
-    </Main>
 
+        <Main v-else>
+            <p class="col-span-full p-4 text-center text-gray-500">
+                Productos encontrados para <span class="font-semibold"> {{ searchQuery }} </span>
+            </p>
+            <UserProductCard :products="searchResults" @agregar="agregarAlCarrito" :updatePrice="updatePrice" />
+        </Main>
+    </div>
     <hr />
 
     <div>

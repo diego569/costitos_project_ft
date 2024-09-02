@@ -53,18 +53,19 @@
 
 <script setup>
     import {ref, onMounted} from "vue";
+    import {apiurl} from "~/services/api.js";
 
     const users = ref([]);
     const showAddUserForm = ref(false);
     const newUser = ref({firstName: "", lastName: "", email: ""});
 
     const fetchUsers = async () => {
-        const response = await fetch("http://localhost:8000/api/admin/user");
+        const response = await fetch(apiurl("/admin/user"));
         users.value = await response.json();
     };
 
     const addUser = async () => {
-        await fetch("http://localhost:8000/api/admin/user", {
+        await fetch(apiurl("/admin/user"), {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(newUser.value),
@@ -75,7 +76,7 @@
     };
 
     const deleteUser = async (id) => {
-        await fetch(`http://localhost:8000/api/admin/user/${id}`, {
+        await fetch(apiurl(`/admin/user/${id}`), {
             method: "DELETE",
         });
         fetchUsers();

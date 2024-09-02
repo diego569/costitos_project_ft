@@ -1,6 +1,7 @@
 <script setup>
     import {ref, onMounted} from "vue";
     import {getUserId, getToken} from "@/services/auth";
+    import {apiurl} from "~/services/api.js";
 
     const quotations = ref([]);
     const error = ref(null);
@@ -12,7 +13,7 @@
                 throw new Error("User ID not found");
             }
 
-            const response = await fetch(`http://localhost:8000/api/user/cotizaciones/getquotationbyid/${userId}`, {
+            const response = await fetch(apiurl(`//user/cotizaciones/getquotationbyid/${userId}`), {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",

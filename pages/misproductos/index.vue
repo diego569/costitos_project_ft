@@ -2,6 +2,7 @@
     import {ref, onMounted} from "vue";
     import {fetchWithAuth, getUserId} from "@/services/auth";
     import {TransitionRoot, TransitionChild} from "@headlessui/vue";
+    import {apiurl} from "~/services/api.js";
 
     const supplierId = getUserId();
 
@@ -23,7 +24,7 @@
 
     const fetchCategoriesBySupplier = async () => {
         try {
-            const response = await fetchWithAuth(`http://localhost:8000/api/supplier/misproductos/getcategoriesbysupplier2/${supplierId}`, "GET");
+            const response = await fetchWithAuth(apiurl(`/supplier/misproductos/getcategoriesbysupplier2/${supplierId}`), "GET");
             categories.value = response.data;
         } catch (error) {
             console.error(error);
@@ -34,7 +35,7 @@
 
     const fetchSubcategoriesBySupplierAndCategory = async (categoryId) => {
         try {
-            const response = await fetchWithAuth(`http://localhost:8000/api/supplier/misproductos/getsubcategoriesbysupplierandcategory/${supplierId}/${categoryId}`, "GET");
+            const response = await fetchWithAuth(apiurl(`/supplier/misproductos/getsubcategoriesbysupplierandcategory/${supplierId}/${categoryId}`), "GET");
             subcategories.value = response.data;
         } catch (error) {
             console.error(error);
@@ -44,7 +45,7 @@
     const fetchProductsBySupplier = async () => {
         isLoadingProducts.value = true;
         try {
-            const response = await fetchWithAuth(`http://localhost:8000/api/supplier/misproductos/getproductsbysupplier/${supplierId}`, "GET");
+            const response = await fetchWithAuth(apiurl(`/supplier/misproductos/getproductsbysupplier/${supplierId}`), "GET");
             products.value = response.data;
         } catch (error) {
             console.error(error);
@@ -55,7 +56,7 @@
     const fetchProductsBySupplierAndCategory = async (categoryId) => {
         isLoadingProducts.value = true;
         try {
-            const response = await fetchWithAuth(`http://localhost:8000/api/supplier/misproductos/getproductsbysupplierandcategory/${supplierId}/${categoryId}`, "GET");
+            const response = await fetchWithAuth(apiurl(`/supplier/misproductos/getproductsbysupplierandcategory/${supplierId}/${categoryId}`), "GET");
             products.value = response.data;
         } catch (error) {
             console.error(error);
@@ -67,7 +68,7 @@
     const fetchProductsBySupplierAndSubcategory = async (subcategoryId) => {
         isLoadingProducts.value = true;
         try {
-            const response = await fetchWithAuth(`http://localhost:8000/api/supplier/misproductos/getproductsbysupplierandsubcategory/${supplierId}/${subcategoryId}`, "GET");
+            const response = await fetchWithAuth(apiurl(`/supplier/misproductos/getproductsbysupplierandsubcategory/${supplierId}/${subcategoryId}`), "GET");
             products.value = response.data;
         } catch (error) {
             console.error(error);
@@ -84,7 +85,7 @@
 
         isLoadingDefaultSearchResults.value = true;
         try {
-            const response = await fetchWithAuth(`http://localhost:8000/api/supplier/misproductos/searchproductsbysupplier/${supplierId}?query=${categorySearchQuery.value}`, "GET");
+            const response = await fetchWithAuth(apiurl(`/supplier/misproductos/searchproductsbysupplier/${supplierId}?query=${categorySearchQuery.value}`), "GET");
             defaultSearchResults.value = response.data;
         } catch (error) {
             console.error(error);
@@ -101,7 +102,7 @@
 
         isLoadingCategorySearchResults.value = true;
         try {
-            const response = await fetchWithAuth(`http://localhost:8000/api/supplier/misproductos/searchproductsbysupplierandcategory/${supplierId}/${selectedCategory.value}?query=${categorySearchQuery.value}`, "GET");
+            const response = await fetchWithAuth(apiurl(`/supplier/misproductos/searchproductsbysupplierandcategory/${supplierId}/${selectedCategory.value}?query=${categorySearchQuery.value}`), "GET");
             categorySearchResults.value = response.data;
         } catch (error) {
             console.error(error);
@@ -118,7 +119,7 @@
 
         isLoadingSubcategorySearchResults.value = true;
         try {
-            const response = await fetchWithAuth(`http://localhost:8000/api/supplier/misproductos/searchproductsbysupplierandsubcategory/${supplierId}/${selectedSubcategory.value}?query=${subcategorySearchQuery.value}`, "GET");
+            const response = await fetchWithAuth(apiurl(`/supplier/misproductos/searchproductsbysupplierandsubcategory/${supplierId}/${selectedSubcategory.value}?query=${subcategorySearchQuery.value}`), "GET");
             subcategorySearchResults.value = response.data;
         } catch (error) {
             console.error(error);
@@ -268,7 +269,7 @@
                             <span class="ml-2 hidden md:block"> Agregar nuevo producto</span>
                         </button>
                     </div>
-                    <Input id="defaultSearch" type="text" v-model="categorySearchQuery" @input="searchProductsBySupplier" placeholder="Buscar productos..." />
+                    <UiInput id="defaultSearch" type="text" v-model="categorySearchQuery" @input="searchProductsBySupplier" placeholder="Buscar productos..." />
                     <div v-if="isLoadingDefaultSearchResults">
                         <p>Cargando resultados...</p>
                     </div>
@@ -294,7 +295,7 @@
                             <span class="ml-2 hidden md:block"> Agregar nuevo producto</span>
                         </button>
                     </div>
-                    <Input id="categorySearch" type="text" v-model="categorySearchQuery" @input="searchProductsBySupplierAndCategory" placeholder="Buscar productos..." />
+                    <UiInput id="categorySearch" type="text" v-model="categorySearchQuery" @input="searchProductsBySupplierAndCategory" placeholder="Buscar productos..." />
                     <div v-if="isLoadingCategorySearchResults">
                         <p>Cargando resultados...</p>
                     </div>
@@ -320,7 +321,7 @@
                             <span class="ml-2 hidden md:block"> Agregar nuevo producto</span>
                         </button>
                     </div>
-                    <Input id="subcategorySearch" type="text" v-model="subcategorySearchQuery" @input="searchProductsBySupplierAndSubcategory" placeholder="Buscar productos..." />
+                    <UiInput id="subcategorySearch" type="text" v-model="subcategorySearchQuery" @input="searchProductsBySupplierAndSubcategory" placeholder="Buscar productos..." />
                     <div v-if="isLoadingSubcategorySearchResults">
                         <p>Cargando resultados...</p>
                     </div>

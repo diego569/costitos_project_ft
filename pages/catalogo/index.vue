@@ -1,6 +1,6 @@
 <script setup>
     import {ref, onMounted} from "vue";
-    import {agregarProducto} from "~/services/carrito.js";
+    import {agregarProducto} from "~/services/usercart";
 
     const recentProducts = ref([]);
     const searchResults = ref([]);
@@ -12,10 +12,11 @@
     const isLoadingCategories = ref(true);
     const isSearching = ref(false);
     const noResultsFound = ref(false);
+    import {apiurl} from "~/services/api.js";
 
     const fetchRecentProducts = async () => {
         try {
-            const response = await fetch("http://localhost:8000/api/guest/catalogo/getrecentsupplierproducts");
+            const response = await fetch(apiurl("/guest/catalogo/getrecentsupplierproducts"));
             if (!response.ok) throw new Error("Failed to fetch recent products");
 
             const data = await response.json();
@@ -28,7 +29,7 @@
 
     const fetchMostQuotedProducts = async () => {
         try {
-            const response = await fetch("http://localhost:8000/api/guest/catalogo/getmostquotedproducts");
+            const response = await fetch(apiurl("/guest/catalogo/getmostquotedproducts"));
             if (!response.ok) throw new Error("Failed to fetch most quoted products");
 
             const data = await response.json();
@@ -41,7 +42,7 @@
 
     const fetchCategories = async () => {
         try {
-            const response = await fetch("http://localhost:8000/api/guest/catalogo/getcategories");
+            const response = await fetch(apiurl("/guest/catalogo/getcategories"));
             if (!response.ok) throw new Error("Failed to fetch categories");
 
             const data = await response.json();
@@ -64,7 +65,7 @@
         noResultsFound.value = false;
 
         try {
-            const response = await fetch(`http://localhost:8000/api/guest/catalogo/search?query=${searchQuery.value}`);
+            const response = await fetch(apiurl(`/guest/catalogo/search?query=${searchQuery.value}`));
             if (!response.ok) throw new Error("Error fetching products");
 
             const data = await response.json();
@@ -102,19 +103,25 @@
             <span class="bg-gradient-to-r from-yellow-400 to-primary-600 bg-clip-text text-transparent">Materiales de Construcción</span>
         </h1>
         <div class="relative w-full max-w-md">
-            <Input type="text" v-model="searchQuery" @input="searchProducts" placeholder="Buscar General.." class="mb-4 w-full rounded border p-2" />
+            <UiInput type="text" v-model="searchQuery" @input="searchProducts" placeholder="Buscar General.." class="mb-4 w-full rounded border p-2" />
         </div>
     </div>
 
-    <Main v-if="searchQuery">
-        <div v-if="isSearching">
+    <div v-if="searchQuery">
+        <Main v-if="isSearching">
             <ProductCardSkeleton v-for="n in 6" :key="n" />
-        </div>
-        <div v-else-if="noResultsFound" class="col-span-full p-4 text-center text-gray-500">
+        </Main>
+        <div v-else-if="noResultsFound" class="p-4 text-center text-gray-500">
             No se encontró ningún producto llamado <span class="font-semibold"> {{ searchQuery }} </span>
         </div>
-        <UserProductCard v-else :products="searchResults" @agregar="agregarAlCarrito" :updatePrice="updatePrice" />
-    </Main>
+
+        <Main v-else>
+            <p class="col-span-full p-4 text-center text-gray-500">
+                Productos encontrados para <span class="font-semibold"> {{ searchQuery }} </span>
+            </p>
+            <UserProductCard :products="searchResults" @agregar="agregarAlCarrito" :updatePrice="updatePrice" />
+        </Main>
+    </div>
 
     <hr />
 

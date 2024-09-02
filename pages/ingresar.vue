@@ -41,12 +41,12 @@
                     </div>
                     <form @submit.prevent="handleLogin">
                         <div class="mb-4">
-                            <Label forId="email" text="Email" />
-                            <Input id="email" type="email" v-model="credentials.email" placeholder="Ingrese su email" required />
+                            <UiLabel forId="email" text="Email" />
+                            <UiInput id="email" type="email" v-model="credentials.email" placeholder="Ingrese su email" required />
                         </div>
                         <div class="mb-6">
-                            <Label forId="password" text="Contraseña" />
-                            <Input id="password" type="password" v-model="credentials.password" placeholder="Ingrese su contraseña" required />
+                            <UiLabel forId="password" text="Contraseña" />
+                            <UiInput id="password" type="password" v-model="credentials.password" placeholder="Ingrese su contraseña" required />
                         </div>
                         <button type="submit" class="w-full rounded-lg bg-orange-500 py-2 text-white hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-600 focus:ring-opacity-50">Iniciar sesión</button>
                         <p v-if="error" class="mt-4 text-center text-red-500">{{ error }}</p>

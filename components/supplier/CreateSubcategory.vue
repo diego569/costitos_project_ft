@@ -2,6 +2,7 @@
     import {ref} from "vue";
     import {Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot} from "@headlessui/vue";
     import {fetchWithAuth} from "@/services/auth";
+    import {apiurl} from "~/services/api.js";
 
     const props = defineProps({
         showModal: Boolean,
@@ -19,7 +20,7 @@
 
         isLoading.value = true;
         try {
-            const response = await fetchWithAuth(`http://localhost:8000/api/supplier/misproductos/subcategories`, "POST", {
+            const response = await fetchWithAuth(apiurl(`/supplier/misproductos/subcategories`), "POST", {
                 name: subcategoryName.value,
                 categoryId: props.categoryId,
             });
