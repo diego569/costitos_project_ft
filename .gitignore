@@ -1,9 +1,9 @@
-.output
+# .output
 .data
 .nuxt
 .nitro
 .cache
-dist
+# dist
 .prettierrc
 
 node_modules

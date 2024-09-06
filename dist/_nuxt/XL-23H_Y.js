@@ -1,0 +1,1 @@
+import{o as e,c as r,t as o}from"./0G305dhd.js";const a=["for"],i={__name:"Label",props:{forId:{type:String,required:!0},text:{type:String,required:!0}},setup(t){return(s,c)=>(e(),r("label",{for:t.forId,class:"mb-2 block text-sm font-medium text-gray-900"},o(t.text),9,a))}};export{i as _};
