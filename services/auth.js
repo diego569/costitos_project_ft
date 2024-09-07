@@ -34,6 +34,14 @@ export const getUserName = () => {
     return null;
 };
 
+export const getUserRole = () => {
+    if (isLocalStorageAvailable()) {
+        const userData = JSON.parse(localStorage.getItem("userData")) || {};
+        return userData.role || null;
+    }
+    return null;
+};
+
 export const logout = async (router) => {
     try {
         const response = await fetch(apiurl("/auth/salir/logout"), {
@@ -63,6 +71,7 @@ export const getCart = () => {
     }
     return [];
 };
+
 export const fetchWithAuth = async (url, method, body) => {
     try {
         const response = await fetch(url, {
@@ -84,7 +93,37 @@ export const fetchWithAuth = async (url, method, body) => {
         throw error;
     }
 };
-// Nueva función login
+
+const redirectBasedOnRole = (role) => {
+    if (role === "user") {
+        window.location.href = "/catalogo";
+    } else if (role === "supplier") {
+        window.location.href = "/explorar";
+    } else {
+        window.location.href = "/catalogo";
+    }
+};
+
+const storeUserData = (data) => {
+    localStorage.setItem("userData", JSON.stringify(data.data));
+    localStorage.setItem("token", data.token);
+};
+
+const processAuthResponse = (response, error) => {
+    if (!response.ok) {
+        throw new Error("Error en la autenticación");
+    }
+
+    return response.json().then((data) => {
+        storeUserData(data);
+
+        error.value = "";
+
+        const role = data.data.role;
+        redirectBasedOnRole(role);
+    });
+};
+
 export async function login(credentials, error) {
     try {
         const response = await fetch(apiurl("/auth/ingresar/login"), {
@@ -95,25 +134,34 @@ export async function login(credentials, error) {
             body: JSON.stringify(credentials),
         });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message);
-        }
-
-        const data = await response.json();
-        localStorage.setItem("userData", JSON.stringify(data.data));
-        localStorage.setItem("token", data.token);
-        error.value = "";
-
-        const role = data.data.role;
-        if (role === "user") {
-            window.location.href = "/catalogo";
-        } else if (role === "supplier") {
-            window.location.href = "/explorar";
-        } else {
-            window.location.href = "/";
-        }
+        await processAuthResponse(response, error);
     } catch (err) {
         error.value = err.message;
     }
 }
+
+export const register = async (registerData, error) => {
+    if (!registerData.terms) {
+        error.value = "Debe aceptar los términos y condiciones para continuar";
+        return;
+    }
+
+    if (registerData.password !== registerData.confirmPassword) {
+        error.value = "Las contraseñas no coinciden";
+        return;
+    }
+
+    try {
+        const response = await fetch(apiurl("/auth/registrarse/register"), {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(registerData),
+        });
+
+        await processAuthResponse(response, error);
+    } catch (err) {
+        error.value = err.message;
+    }
+};

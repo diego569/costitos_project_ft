@@ -15,6 +15,7 @@ export default defineNuxtConfig({
     runtimeConfig: {
         public: {
             BASE_URL: process.env.NUXT_DEV_VITE_URL,
+            F_BASE_URL: process.env.NUXT_DEV_VITE_BASE,
         },
     },
 

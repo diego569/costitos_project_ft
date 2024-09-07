@@ -4,7 +4,8 @@
     import {Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems} from "@headlessui/vue";
     import {Bars3Icon, BellIcon, XMarkIcon, UserIcon, ShoppingCartIcon, RectangleGroupIcon, UserGroupIcon} from "@heroicons/vue/24/outline";
     import {getUserId, getUserName, getToken, logout} from "@/services/auth"; // Importar la función logout
-    import {apiurl} from "~/services/api.js";
+    import {apiurl, url} from "~/services/api.js";
+
     const props = defineProps({
         showMenu: Boolean,
     });
@@ -64,7 +65,7 @@
             <div class="relative flex h-[60px] items-center justify-between">
                 <div class="flex h-full flex-1 items-center justify-start sm:items-stretch sm:justify-start">
                     <div class="flex flex-shrink-0 items-center">
-                        <a href="http://localhost:3000/" class="flex items-center space-x-2">
+                        <a :href="url()" class="flex items-center space-x-2">
                             <LogosFigura class="h-8 w-8" />
                             <LogosTexto class="h-4 w-auto" />
                         </a>
