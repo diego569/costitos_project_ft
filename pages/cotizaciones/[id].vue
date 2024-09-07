@@ -294,19 +294,13 @@
     };
 </script>
 <template>
-    <div class="flex items-center justify-between">
+    <div class="flex items-center">
         <NuxtLink to="/cotizaciones" class="inline-flex items-center rounded py-2 text-primary-600 hover:text-primary-800">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="mr-2 h-4 w-4">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
             Volver a Cotizaciones
         </NuxtLink>
-        <button @click="exportToExcel" class="inline-flex items-center rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-700">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="mr-2 h-4 w-4">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-            Imprimir
-        </button>
     </div>
 
     <div class="bg-white md:p-4">
@@ -314,6 +308,7 @@
             <h2 class="px-4 py-2 text-xl font-bold md:text-center">
                 {{ quotationName }}
                 <button @click="openModal" class="ml-4 text-sm text-blue-500 hover:underline">Editar</button>
+                <button @click="exportToExcel" class="ml-4 text-sm text-primary-500 hover:underline">Imprimir</button>
             </h2>
 
             <div v-if="isModalOpen" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">

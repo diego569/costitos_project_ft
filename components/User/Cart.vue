@@ -5,9 +5,9 @@
     import {showMenu} from "@/services/menuService";
     import {getUserId, fetchWithAuth} from "@/services/auth";
     import {apiurl} from "~/services/api.js";
+    import {fetchQuotationCount} from "@/services/user";
 
     const router = useRouter();
-
     const carrito = computed(() => obtenerCarrito());
     const totalProductos = computed(() => carrito.value.length);
     const userId = getUserId();
@@ -20,16 +20,25 @@
     });
 
     const supplierCount = ref(3);
+    const errorMessage = ref("");
 
     const createQuotation = async () => {
+        errorMessage.value = "";
         try {
             const {quotationId, quotationNumber} = await fetchWithAuth(apiurl("/user/carrito/createquotation"), "POST", quotationData.value);
 
             console.log("Cotización creada con ID:", quotationId, "y Número de Cotización:", quotationNumber);
             await addProductsToQuotation(quotationId);
             return {quotationId, quotationNumber};
+            fetchQuotationCount();
         } catch (error) {
             console.error("Error al crear la cotización:", error);
+
+            if (error.message.includes("No tiene suficientes cotizaciones disponibles")) {
+                errorMessage.value = "No tiene suficientes cotizaciones disponibles.";
+            } else {
+                errorMessage.value = "Error al crear la cotización.";
+            }
         }
     };
 
@@ -59,7 +68,8 @@
             });
 
             console.log(data.message);
-            router.push(`/cotizaciones/${quotationId}`);
+            // router.push(`/cotizaciones/${quotationId}`);
+            window.location.href = `/cotizaciones/${quotationId}`;
             showMenu.value = false;
         } catch (error) {
             console.error("Error al agregar productos a QuotationSupplierProducts:", error);
@@ -106,6 +116,8 @@
         </div>
 
         <div class="flex flex-col justify-center border-t p-2 disabled:cursor-not-allowed sm:p-4">
+            <div v-if="errorMessage" class="py-2 text-red-500">{{ errorMessage }}</div>
+
             <div class="flex items-center gap-2 py-2 text-center">
                 <div class="w-full text-base font-semibold leading-6 text-gray-900">Cantidad de proveedores</div>
                 <div class="w-full">
@@ -114,6 +126,7 @@
                     </select>
                 </div>
             </div>
+
             <ButtonC :label="'Realizar Cotización'" :disabled="carrito.length === 0" @click="handleCreateQuotation" />
         </div>
     </div>

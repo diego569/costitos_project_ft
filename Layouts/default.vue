@@ -5,7 +5,7 @@
     import {Bars3Icon, BellIcon, XMarkIcon, UserIcon, ShoppingCartIcon, RectangleGroupIcon, UserGroupIcon} from "@heroicons/vue/24/outline";
     import {getUserId, getUserName, getToken, logout} from "@/services/auth"; // Importar la función logout
     import {apiurl, url} from "~/services/api.js";
-
+    import {fetchQuotationCount} from "@/services/user"; // Importar la función fetchQuotationCount
     const props = defineProps({
         showMenu: Boolean,
     });
@@ -28,29 +28,12 @@
         logout(router);
     };
 
-    const fetchQuotationCount = async () => {
+    onMounted(async () => {
         try {
-            if (user.value.id) {
-                const response = await fetch(apiurl(`/user/cotizaciones/${user.value.id}/quotationcount`), {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${getToken()}`,
-                    },
-                });
-                if (!response.ok) {
-                    throw new Error("Error al obtener cotizaciones");
-                }
-                const data = await response.json();
-                quotationCount.value = data.quotationCount;
-            }
+            quotationCount.value = await fetchQuotationCount();
         } catch (error) {
-            console.error("Error al obtener cotizaciones:", error);
+            console.error(error);
         }
-    };
-
-    onMounted(() => {
-        fetchQuotationCount();
     });
 
     const navigation = [
