@@ -1,3 +1,6 @@
+<script setup>
+    import {url} from "~/services/api.js";
+</script>
 <template>
     <main class="grid min-h-full bg-white px-6 py-24 sm:py-32 lg:px-8">
         <div class="text-center">
@@ -9,6 +12,3 @@
         </div>
     </main>
 </template>
-<script setup>
-    import {url} from "~/services/api.js";
-</script>

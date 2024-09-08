@@ -1,0 +1,1 @@
+import{P as r,e as t,Q as a}from"./BPtiCvXN.js";const c={__name:"index",setup(n){const e=r();t(()=>{o()});const o=()=>{const s=a();s==="user"?e.push({name:"catalogo"}):s==="supplier"?e.push({name:"explorar"}):e.push({name:"catalogo"})};return(s,u)=>null}};export{c as default};

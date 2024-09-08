@@ -97,7 +97,7 @@
             <ProductCardSkeleton v-for="n in 6" :key="n" />
         </Main>
         <Main v-else>
-            <ProductCard2 v-for="product in recentProducts" :key="product.id" :product="product" @agregar="agregarAlCarritoSupplier" />
+            <SupplierProductCard v-for="product in recentProducts" :key="product.id" :product="product" @agregar="agregarAlCarritoSupplier" />
         </Main>
     </div>
 </template>
