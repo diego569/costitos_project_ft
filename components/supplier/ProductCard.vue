@@ -1,5 +1,6 @@
 <script setup>
     import {ref} from "vue";
+    import {defineProps, defineEmits} from "vue";
 
     const props = defineProps({
         product: Object,
@@ -26,8 +27,8 @@
 </script>
 
 <template>
-    <div class="relative flex flex-col justify-between rounded-xl bg-white bg-clip-border p-2 text-gray-700 transition-all duration-200 hover:shadow-md" @click="openProductDetailModal">
-        <div class="relative aspect-square overflow-hidden rounded-xl bg-white bg-clip-border text-gray-700">
+    <div class="relative flex flex-col justify-between rounded-xl bg-white bg-clip-border p-2 text-gray-700 transition-all duration-200 hover:shadow-md">
+        <div class="relative aspect-square overflow-hidden rounded-xl bg-white bg-clip-border text-gray-700 hover:cursor-pointer" @click="openProductDetailModal">
             <img v-show="!isLoading" :src="product.photo" @load="handleImageLoad" alt="card-image" class="h-full w-full object-cover object-center" />
             <div v-show="isLoading" class="flex h-full w-full animate-pulse items-center justify-center bg-gray-200">
                 <svg class="h-5 w-5 animate-spin text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -45,12 +46,12 @@
 
         <div class="flex w-full">
             <button
-                class="block w-full select-none rounded-lg bg-gray-900/10 px-5 py-3 text-center align-middle font-sans text-xs font-bold uppercase text-gray-900 shadow-none shadow-gray-900/10 transition-all hover:scale-105 hover:shadow-none hover:shadow-gray-900/20"
-                @click.stop="openProductDetailModal">
-                Ver detalles
+                class="block w-full select-none rounded-lg bg-gray-900/10 px-5 py-3 text-center align-middle font-sans text-xs font-bold uppercase text-gray-900 shadow-none shadow-gray-900/10 transition-all hover:scale-105 hover:shadow-none hover:shadow-gray-900/20 focus:scale-105 focus:opacity-[0.85] focus:shadow-none active:scale-100 active:opacity-[0.85] active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                type="button"
+                @click="$emit('agregar', product, product.selectedMeasure)">
+                Agregar
             </button>
         </div>
-
         <SupplierProductDetail :showModal="showProductDetailModal" :product="selectedProduct" :closeModal="closeProductDetailModal" />
     </div>
 </template>
