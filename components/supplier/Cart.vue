@@ -1,8 +1,9 @@
 <script setup>
     import {ref, computed} from "vue";
     import {getUserId, fetchWithAuth} from "~/services/auth.js";
-    import {obtenerCarritoSupplier, quitarProductoSupplier, updateProductoSupplier, agregarMedidaSupplier, quitarMedidaSupplier} from "~/services/suppliercart";
+    import {obtenerCarritoSupplier, quitarProductoSupplier, updateProductoSupplier, agregarMedidaSupplier, quitarMedidaSupplier, vaciarCarritoSupplier} from "~/services/suppliercart";
     import {apiurl} from "~/services/api.js";
+    import {showMenu} from "@/services/menuService";
 
     const carrito = computed(() => obtenerCarritoSupplier());
     const totalProductos = computed(() => carrito.value.length);
@@ -42,6 +43,10 @@
         quitarProductoSupplier(productoId);
     };
 
+    const vaciarCarrito = () => {
+        vaciarCarritoSupplier();
+    };
+
     const enviarCotizacion = async () => {
         try {
             const products = carrito.value.flatMap((item) =>
@@ -52,8 +57,6 @@
                 }))
             );
 
-            console.table(products);
-
             const userId = getUserId();
             if (!userId) {
                 throw new Error("Usuario no autenticado.");
@@ -61,6 +64,8 @@
 
             const response = await fetchWithAuth(apiurl("/supplier/carrito/addsupplierproducts"), "POST", {userId, products});
 
+            vaciarCarrito();
+            showMenu.value = false;
             console.log(response.message);
         } catch (error) {
             console.error("Error al enviar la cotización:", error);

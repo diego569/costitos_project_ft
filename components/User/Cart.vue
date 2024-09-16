@@ -1,6 +1,6 @@
 <script setup>
     import {ref, computed} from "vue";
-    import {obtenerCarrito, quitarProducto, incrementarCantidad, decrementarCantidad, totalProductosSeleccionados, updateCantidad} from "~/services/usercart.js";
+    import {obtenerCarrito, quitarProducto, incrementarCantidad, decrementarCantidad, totalProductosSeleccionados, updateCantidad, vaciarCarrito} from "~/services/usercart.js";
     import {useRouter} from "vue-router";
     import {showMenu} from "@/services/menuService";
     import {getUserId, fetchWithAuth} from "@/services/auth";
@@ -21,6 +21,10 @@
 
     const supplierCount = ref(3);
     const errorMessage = ref("");
+
+    const vaciarCarritoUser = () => {
+        vaciarCarrito();
+    };
 
     const createQuotation = async () => {
         errorMessage.value = "";
@@ -68,8 +72,8 @@
             });
 
             console.log(data.message);
-            // router.push(`/cotizaciones/${quotationId}`);
             window.location.href = `/cotizaciones/${quotationId}`;
+            vaciarCarritoUser();
             showMenu.value = false;
         } catch (error) {
             console.error("Error al agregar productos a QuotationSupplierProducts:", error);

@@ -6,7 +6,27 @@
     import {showMenu} from "@/services/menuService";
     import {getUserId, getToken} from "@/services/auth";
     import {apiurl} from "~/services/api.js";
+    import {totalProductosSeleccionados} from "~/services/usercart.js";
+    import {totalProductosSeleccionadosSupplier} from "~/services/suppliercart.js";
 
+    const route = useRoute();
+    const authRoutes = ["ingresar", "registrarse"];
+    const isAuthRoute = computed(() => authRoutes.includes(route.name));
+
+    const totalProductos = computed(() => totalProductosSeleccionados());
+    const totalProductossupplier = computed(() => totalProductosSeleccionadosSupplier());
+
+    watch(totalProductos, (newTotal) => {
+        if (newTotal > 0) {
+            showMenu.value = true;
+        }
+    });
+
+    watch(totalProductossupplier, (newTotal) => {
+        if (newTotal > 0) {
+            showMenu.value = true;
+        }
+    });
     const showQuoteModal = ref(false);
     const numberOfSuppliers = ref(3);
 
@@ -113,10 +133,6 @@
             showAlertMessage("Error al enviar el carrito");
         }
     };
-
-    const route = useRoute();
-    const authRoutes = ["ingresar", "registrarse"];
-    const isAuthRoute = computed(() => authRoutes.includes(route.name));
 </script>
 <template>
     <div class="min-h-screen bg-gray-100" v-if="!isAuthRoute">
@@ -132,7 +148,6 @@
             </div>
         </NuxtLayout>
 
-        <!-- Modal para Cotización -->
         <Modal :model="showQuoteModal">
             <template #title>Cotizar</template>
             <label for="numberOfSuppliers">Número de Proveedores:</label>
@@ -145,7 +160,6 @@
             </template>
         </Modal>
 
-        <!-- Modal para actualizar cantidad del producto -->
         <Modal :model="showModal">
             <template #title>
                 <div class="flex flex-col items-center gap-3 md:flex-row">
@@ -172,7 +186,6 @@
             </template>
         </Modal>
 
-        <!-- Alerta -->
         <div v-if="showAlert" class="fixed bottom-0 left-0 mb-4 ml-4">
             <div class="flex items-center rounded-lg border border-primary-300 bg-primary-50 p-4 text-sm text-primary-800" role="alert">
                 <span class="font-medium">{{ alertMessage }}</span>
@@ -180,6 +193,5 @@
         </div>
     </div>
 
-    <!-- Mostrar solo la página para rutas de autenticación -->
     <NuxtPage v-else />
 </template>

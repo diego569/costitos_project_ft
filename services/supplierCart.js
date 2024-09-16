@@ -2,10 +2,8 @@ import {reactive, watchEffect} from "vue";
 
 const isBrowser = typeof window !== "undefined";
 
-// Leer carrito de localStorage al iniciar
 const carritoSupplier = reactive(isBrowser ? JSON.parse(localStorage.getItem("carritoSupplier") || "[]") : []);
 
-// Guardar carrito en localStorage cada vez que cambie
 if (isBrowser) {
     watchEffect(() => {
         localStorage.setItem("carritoSupplier", JSON.stringify(carritoSupplier));
@@ -69,4 +67,9 @@ export const obtenerCarritoSupplier = () => {
 
 export const totalProductosSeleccionadosSupplier = () => {
     return carritoSupplier.length;
+};
+
+export const vaciarCarritoSupplier = () => {
+    localStorage.removeItem("carritoSupplier");
+    carritoSupplier.length = 0;
 };

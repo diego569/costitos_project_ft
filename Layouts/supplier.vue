@@ -3,8 +3,11 @@
     import {useRouter} from "vue-router";
     import {Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems} from "@headlessui/vue";
     import {Bars3Icon, BellIcon, XMarkIcon, UserIcon, ShoppingCartIcon, RectangleGroupIcon, UserGroupIcon} from "@heroicons/vue/24/outline";
-    import {getUserId, getUserName, logout} from "@/services/auth"; // Importar las funciones necesarias
+    import {getUserId, getUserName, logout} from "@/services/auth";
     import {url} from "~/services/api.js";
+    import {totalProductosSeleccionadosSupplier} from "~/services/suppliercart.js";
+
+    const totalProductos = computed(() => totalProductosSeleccionadosSupplier());
 
     const props = defineProps({
         showMenu: Boolean,
@@ -60,6 +63,9 @@
                     <button type="button" class="relative rounded-md bg-gray-100 p-1.5 text-gray-600 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-100" @click="$emit('toggle-menu')">
                         <span class="sr-only">View notifications</span>
                         <ShoppingCartIcon class="h-6 w-6 text-gray-500" />
+                        <span v-if="totalProductos > 0" class="absolute right-0 top-0 inline-flex items-center justify-center rounded-full bg-primary-600 px-1.5 py-1 text-xs font-light leading-none text-red-100">
+                            {{ totalProductos }}
+                        </span>
                     </button>
 
                     <!-- Profile dropdown -->
