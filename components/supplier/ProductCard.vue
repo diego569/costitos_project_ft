@@ -12,6 +12,7 @@
     const isLoading = ref(true);
     const showProductDetailModal = ref(false);
     const selectedProduct = ref(null);
+
     const handleImageLoad = () => {
         isLoading.value = false;
     };
@@ -25,9 +26,10 @@
         showProductDetailModal.value = false;
     };
 </script>
-
 <template>
     <div class="relative flex flex-col justify-between rounded-xl bg-white bg-clip-border p-2 text-gray-700 transition-all duration-200 hover:shadow-md">
+        <div v-if="!product.isAuthorized" class="absolute right-2 top-2 z-10 rounded-lg bg-blue-500 px-3 py-1 text-xs font-semibold text-white">En Revisión</div>
+
         <div class="relative aspect-square overflow-hidden rounded-xl bg-white bg-clip-border text-gray-700 hover:cursor-pointer" @click="openProductDetailModal">
             <img v-show="!isLoading" :src="product.photo" @load="handleImageLoad" alt="card-image" class="h-full w-full object-cover object-center" />
             <div v-show="isLoading" class="flex h-full w-full animate-pulse items-center justify-center bg-gray-200">
@@ -37,6 +39,7 @@
                 </svg>
             </div>
         </div>
+
         <div class="p-2 sm:p-3">
             <div class="mb-2 flex items-center justify-between">
                 <p class="line-clamp-2 font-sans text-sm font-medium leading-relaxed text-gray-900 antialiased">{{ product.name }}</p>

@@ -27,7 +27,6 @@
     };
 
     onMounted(() => {
-        // Detecta si es un dispositivo móvil o pantalla más grande
         isMobile.value = window.innerWidth <= 768;
     });
 

@@ -53,15 +53,20 @@ export const createProduct = async (product, selectedSubcategoryId, imageId) => 
     return data.id;
 };
 
-export const createSupplierProduct = async (supplierProduct, productId, productName) => {
+export const createSupplierProduct = async (supplierProduct, productId, productName, unitOfMeasureId) => {
     const supplierId = getUserId();
+
+    if (!unitOfMeasureId) {
+        throw new Error("Unidad de medida es requerida.");
+    }
+
     const supplierProductData = {
         id: uuidv4(),
         supplierId: supplierId,
         productId: productId,
         productName: productName,
         price: supplierProduct.price,
-        unitOfMeasure: supplierProduct.unitOfMeasure,
+        unitOfMeasureId: unitOfMeasureId,
         status: "active",
         createdAt: new Date(),
         updatedAt: new Date(),

@@ -34,7 +34,7 @@
 
     const fetchSuppliers = async () => {
         try {
-            const response = await fetch(apiurl("//guest/proveedores/getsuppliers"));
+            const response = await fetch(apiurl("/guest/proveedores/getsuppliers"));
             if (!response.ok) throw new Error("Failed to fetch suppliers");
 
             const data = await response.json();
