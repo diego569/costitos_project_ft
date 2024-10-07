@@ -32,6 +32,12 @@
     const unitOfMeasures = ref([]);
     const selectedUnitOfMeasureId = ref(null);
 
+    const features = ref([]);
+    const selectedFeatureId = ref("");
+    const showCreateFeatureModal = ref(false);
+
+    const featureValue = ref(""); // Asegúrate de definir correctamente featureValue
+
     const fetchCategories = async () => {
         try {
             const response = await fetchWithAuth(apiurl("/supplier/misproductos/getcategories"), "GET");
@@ -72,11 +78,41 @@
             console.error("Error al obtener unidades de medida", error);
         }
     };
+    const fetchFeatures = async () => {
+        try {
+            const response = await fetchWithAuth(apiurl("/supplier/misproductos/getfeatures"), "GET");
+            features.value = response.data;
+
+            if (!selectedFeatureId.value && features.value.length > 0) {
+                selectedFeatureId.value = features.value[0].id;
+            }
+        } catch (error) {
+            console.error("Error al obtener características", error);
+        }
+    };
+
+    const assignFeatureToProduct = async (productId) => {
+        try {
+            if (!featureValue.value.trim()) {
+                throw new Error("Debe ingresar un valor para la característica.");
+            }
+
+            const response = await fetchWithAuth(apiurl("/supplier/misproductos/addfeaturetoproduct"), "POST", {
+                productId,
+                featureId: selectedFeatureId.value,
+                value: featureValue.value,
+            });
+
+            console.log("Característica asignada con éxito:", response.message);
+        } catch (error) {
+            console.error("Error al asignar característica al producto:", error);
+        }
+    };
 
     onMounted(() => {
         fetchCategories();
         fetchUnitOfMeasures();
-
+        fetchFeatures();
         if (props.categoryId) {
             fetchSubcategories(props.categoryId);
         }
@@ -131,7 +167,7 @@
             const imageId = await uploadImage(file.value);
             const productId = await createProduct(product.value, selectedSubcategoryId.value, imageId);
             await createSupplierProduct(supplierProduct.value, productId, product.value.name, selectedUnitOfMeasureId.value);
-
+            assignFeatureToProduct(productId);
             message.value = "Producto creado exitosamente!";
             isSuccess.value = true;
 
@@ -203,6 +239,19 @@
     const handleUnitOfMeasureCreated = (unitOfMeasure) => {
         unitOfMeasures.value.push(unitOfMeasure);
         selectedUnitOfMeasureId.value = unitOfMeasure.id;
+    };
+
+    const openCreateFeatureModal = () => {
+        showCreateFeatureModal.value = true;
+    };
+
+    const closeCreateFeatureModal = () => {
+        showCreateFeatureModal.value = false;
+    };
+
+    const handleFeatureCreated = (newFeature) => {
+        features.value.push(newFeature);
+        selectedFeatureId.value = newFeature.id;
     };
 </script>
 <template>
@@ -277,7 +326,18 @@
                     </div>
                     <SupplierCreateSubcategory :showModal="showCreateSubcategoryModal" :closeModal="closeCreateSubcategoryModal" :categoryId="selectedCategoryId" :onSubcategoryCreated="handleSubcategoryCreated" />
                 </div>
-
+                <div>
+                    <UiLabel forId="feature-select" text="Seleccione Característica:" />
+                    <UiSelect id="feature-select" v-model="selectedFeatureId" :options="features" required />
+                    <div @click="openCreateFeatureModal" class="mt-2 cursor-pointer text-primary-600 hover:text-primary-800">
+                        <p class="select-none font-sans text-xs font-normal leading-normal antialiased">Crear nueva característica</p>
+                    </div>
+                    <SupplierCreateFeature :showModal="showCreateFeatureModal" :closeModal="closeCreateFeatureModal" :onFeatureCreated="handleFeatureCreated" />
+                </div>
+                <div>
+                    <UiLabel forId="feature-value" text="Valor de la característica:" />
+                    <UiInput id="feature-value" v-model="featureValue" type="text" placeholder="Ingrese el valor de la característica" required />
+                </div>
                 <div class="sm:col-span-2">
                     <UiLabel forId="description" text="Descripción:" />
                     <textarea v-model="product.description" id="description" rows="4" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500" placeholder="Escribe la descripción del producto aquí"></textarea>
