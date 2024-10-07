@@ -13,7 +13,7 @@
                 throw new Error("User ID not found");
             }
 
-            const response = await fetch(apiurl(`//user/cotizaciones/getquotationbyid/${userId}`), {
+            const response = await fetch(apiurl(`/user/cotizaciones/getquotationbyid/${userId}`), {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",

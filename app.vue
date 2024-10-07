@@ -2,7 +2,7 @@
     import {ref, onMounted, computed} from "vue";
     import {useRoute, useRouter} from "vue-router";
     import {cart, removeFromCart, incrementQuantity, showAlert, decrementQuantity, uniqueProductsCount, showModal, modalProduct, alertMessage, updateCartProduct} from "~/services/cart";
-    import {sendQuotationRequest} from "~/services/quotation";
+    // import {sendQuotationRequest} from "~/services/quotation";
     import {showMenu} from "@/services/menuService";
     import {getUserId, getToken} from "@/services/auth";
     import {apiurl} from "~/services/api.js";
@@ -82,26 +82,26 @@
     });
 
     const router = useRouter();
-    const handleSendQuotationRequest = async () => {
-        const quotation = {
-            userId: userId.value,
-            name: "Cotización",
-            type: "regular",
-            price: "20",
-            status: "pending",
-            quotationCount: numberOfSuppliers.value,
-        };
-        const result = await sendQuotationRequest(quotation, cart.value);
+    // const handleSendQuotationRequest = async () => {
+    //     const quotation = {
+    //         userId: userId.value,
+    //         name: "Cotización",
+    //         type: "regular",
+    //         price: "20",
+    //         status: "pending",
+    //         quotationCount: numberOfSuppliers.value,
+    //     };
+    //     const result = await sendQuotationRequest(quotation, cart.value);
 
-        if (result.success) {
-            closeAllModals();
-            showMenu.value = false;
-            const id = result.data;
-            router.push(`/cotizaciones/${id}`);
-        } else {
-            showAlertMessage(result.message);
-        }
-    };
+    //     if (result.success) {
+    //         closeAllModals();
+    //         showMenu.value = false;
+    //         const id = result.data;
+    //         router.push(`/cotizaciones/${id}`);
+    //     } else {
+    //         showAlertMessage(result.message);
+    //     }
+    // };
 
     const sendCartToBackend = async () => {
         try {
@@ -155,7 +155,7 @@
                 <option v-for="number in 10" :key="number" :value="number">{{ number }}</option>
             </select>
             <template #button>
-                <PrimaryButton @click="handleSendQuotationRequest">Cotizar</PrimaryButton>
+                <!-- <PrimaryButton @click="handleSendQuotationRequest">Cotizar</PrimaryButton> -->
                 <button type="button" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto" @click="toggleQuoteModal" ref="cancelButtonRef">Cancelar</button>
             </template>
         </Modal>

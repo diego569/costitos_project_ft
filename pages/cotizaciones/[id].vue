@@ -17,7 +17,7 @@
             quotation.value = data.data;
             quotationName.value = data.name;
             formattedDate.value = data.formattedDate;
-
+            console.log(data);
             calculateTotals();
         } catch (err) {
             console.error("Error fetching quotation:", err);
@@ -294,6 +294,7 @@
     };
 </script>
 <template>
+    <!-- {{ quotation }} -->
     <div class="flex items-center">
         <NuxtLink to="/cotizaciones" class="inline-flex items-center rounded py-2 text-primary-600 hover:text-primary-800">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="mr-2 h-4 w-4">
