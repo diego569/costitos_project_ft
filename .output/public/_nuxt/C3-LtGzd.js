@@ -1,1 +1,0 @@
-import{o as l,c as r,C as o,n as c,u as a,s as d}from"./D-0pglP5.js";const n={__name:"Main",setup(e){return(s,i)=>(l(),r("div",{class:c(["grid gap-2",a(d)?"grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5":"grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7"])},[o(s.$slots,"default")],2))}};export{n as _};
