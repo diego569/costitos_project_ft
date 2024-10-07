@@ -4,6 +4,7 @@
     import {uploadImage, createProduct, createSupplierProduct} from "@/services/productService";
     import {apiurl} from "~/services/api.js";
     import {defineEmits} from "vue";
+    import {Disclosure, DisclosureButton, DisclosurePanel} from "@headlessui/vue";
 
     const props = defineProps({
         showModal: Boolean,
@@ -37,6 +38,9 @@
     const showCreateFeatureModal = ref(false);
 
     const featureValue = ref(""); // Asegúrate de definir correctamente featureValue
+    // Variables para manejar características y valores
+    const selectedFeatures = ref([{featureId: "", value: ""}]);
+    const errorMessage = ref("");
 
     const fetchCategories = async () => {
         try {
@@ -91,21 +95,41 @@
         }
     };
 
-    const assignFeatureToProduct = async (productId) => {
+    // Añadir nueva característica
+    const addFeatureInput = () => {
+        selectedFeatures.value.push({featureId: "", value: ""});
+    };
+
+    // Eliminar característica
+    const removeFeatureInput = (index) => {
+        selectedFeatures.value.splice(index, 1);
+    };
+
+    // Asignar características al producto
+    const assignFeaturesToProduct = async (productId) => {
         try {
-            if (!featureValue.value.trim()) {
-                throw new Error("Debe ingresar un valor para la característica.");
+            isLoading.value = true;
+
+            const validFeatures = selectedFeatures.value.filter((f) => f.featureId && f.value); // Validar entradas
+
+            if (validFeatures.length === 0) {
+                throw new Error("Debe seleccionar al menos una característica con valor.");
             }
 
-            const response = await fetchWithAuth(apiurl("/supplier/misproductos/addfeaturetoproduct"), "POST", {
-                productId,
-                featureId: selectedFeatureId.value,
-                value: featureValue.value,
-            });
+            for (const feature of validFeatures) {
+                await fetchWithAuth(apiurl("/supplier/misproductos/addfeaturetoproduct"), "POST", {
+                    productId,
+                    featureId: feature.featureId,
+                    value: feature.value,
+                });
+            }
 
-            console.log("Característica asignada con éxito:", response.message);
+            console.log("Características asignadas con éxito");
         } catch (error) {
-            console.error("Error al asignar característica al producto:", error);
+            console.error("Error al asignar características al producto:", error);
+            errorMessage.value = "Error al asignar características";
+        } finally {
+            isLoading.value = false;
         }
     };
 
@@ -167,7 +191,7 @@
             const imageId = await uploadImage(file.value);
             const productId = await createProduct(product.value, selectedSubcategoryId.value, imageId);
             await createSupplierProduct(supplierProduct.value, productId, product.value.name, selectedUnitOfMeasureId.value);
-            assignFeatureToProduct(productId);
+            assignFeaturesToProduct(productId);
             message.value = "Producto creado exitosamente!";
             isSuccess.value = true;
 
@@ -326,17 +350,42 @@
                     </div>
                     <SupplierCreateSubcategory :showModal="showCreateSubcategoryModal" :closeModal="closeCreateSubcategoryModal" :categoryId="selectedCategoryId" :onSubcategoryCreated="handleSubcategoryCreated" />
                 </div>
-                <div>
-                    <UiLabel forId="feature-select" text="Seleccione Característica:" />
-                    <UiSelect id="feature-select" v-model="selectedFeatureId" :options="features" required />
-                    <div @click="openCreateFeatureModal" class="mt-2 cursor-pointer text-primary-600 hover:text-primary-800">
-                        <p class="select-none font-sans text-xs font-normal leading-normal antialiased">Crear nueva característica</p>
-                    </div>
+
+                <div class="mt-8 sm:col-span-2">
+                    <Disclosure>
+                        <template #default="{open}">
+                            <DisclosureButton class="mb-4 cursor-pointer text-lg font-semibold">
+                                <span :class="{'font-medium': open, 'text-black': !open}">➤ Características(agregar)</span>
+                            </DisclosureButton>
+
+                            <DisclosurePanel>
+                                <div v-for="(feature, index) in selectedFeatures" :key="index" class="mb-4 flex items-center space-x-4">
+                                    <div class="flex-1">
+                                        <UiLabel forId="feature-select" text="Seleccione Característica:" />
+                                        <UiSelect id="feature-select" v-model="feature.featureId" :options="features" optionLabel="name" optionValue="id" placeholder="Selecciona una característica" required />
+                                    </div>
+
+                                    <div class="flex-1">
+                                        <UiLabel forId="feature-value" text="Valor:" />
+                                        <UiInput id="feature-value" v-model="feature.value" type="text" placeholder="Escribe el valor" required />
+                                    </div>
+
+                                    <div>
+                                        <UiButton @click="removeFeatureInput(index)" variant="secondary" defaultText="Eliminar" />
+                                    </div>
+                                </div>
+
+                                <div class="mt-2">
+                                    <UiButton @click="addFeatureInput" variant="primary" defaultText="Agregar más características" />
+                                </div>
+                                <div @click="openCreateFeatureModal" class="mt-2 cursor-pointer text-primary-600 hover:text-primary-800">
+                                    <p class="select-none font-sans text-xs font-normal leading-normal antialiased">Crear nueva característica</p>
+                                </div>
+                            </DisclosurePanel>
+                        </template>
+                    </Disclosure>
+
                     <SupplierCreateFeature :showModal="showCreateFeatureModal" :closeModal="closeCreateFeatureModal" :onFeatureCreated="handleFeatureCreated" />
-                </div>
-                <div>
-                    <UiLabel forId="feature-value" text="Valor de la característica:" />
-                    <UiInput id="feature-value" v-model="featureValue" type="text" placeholder="Ingrese el valor de la característica" required />
                 </div>
                 <div class="sm:col-span-2">
                     <UiLabel forId="description" text="Descripción:" />
