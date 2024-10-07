@@ -95,7 +95,7 @@
 </script>
 
 <template>
-    {{ carrito }}
+    <!-- {{ carrito }} -->
     <div class="w-full transition-all duration-500 lg:block">
         <div class="flex items-center justify-between border-b p-2 sm:p-4">
             <h2 class="text-base font-semibold">Carrito Proveedor</h2>
