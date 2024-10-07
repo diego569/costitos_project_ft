@@ -43,7 +43,12 @@
         vaciarCarritoSupplier();
     };
 
+    let isSubmitting = false;
+
     const enviarCotizacion = async () => {
+        if (isSubmitting) return;
+        isSubmitting = true;
+
         try {
             const products = carrito.value.flatMap((item) =>
                 item.medidas.map((medida) => ({
@@ -69,6 +74,8 @@
             console.log(response.message);
         } catch (error) {
             console.error("Error al enviar la cotización:", error);
+        } finally {
+            isSubmitting = false;
         }
     };
 
@@ -88,6 +95,7 @@
 </script>
 
 <template>
+    {{ carrito }}
     <div class="w-full transition-all duration-500 lg:block">
         <div class="flex items-center justify-between border-b p-2 sm:p-4">
             <h2 class="text-base font-semibold">Carrito Proveedor</h2>
