@@ -1,17 +1,15 @@
-<template></template>
-
 <script setup>
     import {useRouter} from "vue-router";
     import {getUserRole} from "~/services/auth";
 
     const router = useRouter();
 
-    onMounted(() => {
-        redirectBasedOnRole();
+    onMounted(async () => {
+        await redirectBasedOnRole();
     });
 
-    const redirectBasedOnRole = () => {
-        const role = getUserRole();
+    const redirectBasedOnRole = async () => {
+        const role = await getUserRole();
 
         if (role === "user") {
             router.push({name: "catalogo"});

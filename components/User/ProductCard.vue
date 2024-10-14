@@ -15,6 +15,7 @@
 </script>
 
 <template>
+    <!-- {{ products }} -->
     <div v-for="product in products" :key="product.id" class="relative flex flex-col justify-between rounded-xl bg-white bg-clip-border p-2 text-gray-700 transition-all duration-200 hover:shadow-md">
         <!-- comentado<div v-if="!product.isAuthorized" class="absolute right-2 top-2 z-10 rounded-lg bg-blue-500 px-3 py-1 text-xs font-semibold text-white">En Revisión</div> -->
         <NuxtLink :to="{name: 'catalogo-producto-slug', params: {slug: product.slug}}" class="pointer">

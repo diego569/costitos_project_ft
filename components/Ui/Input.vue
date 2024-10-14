@@ -13,7 +13,8 @@
     const props = defineProps({
         id: {
             type: String,
-            required: true,
+            required: false,
+            default: () => "input-" + Math.random().toString(36).substr(2, 9),
         },
         modelValue: {
             type: [String, Number],

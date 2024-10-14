@@ -16,7 +16,7 @@
         name: "Nueva cotización",
         type: "regular",
         status: "pending",
-        quotationCount: 1,
+        quotationCount: totalProductos.value,
     });
 
     const supplierCount = ref(3);
@@ -26,15 +26,27 @@
         vaciarCarrito();
     };
 
+    let isSubmitting = false;
+
     const createQuotation = async () => {
+        if (isSubmitting) return;
+        isSubmitting = true;
+
         errorMessage.value = "";
+
         try {
+            console.log("Enviando datos para crear la cotización:");
+            console.table(quotationData.value);
+
             const {quotationId, quotationNumber} = await fetchWithAuth(apiurl("/user/carrito/createquotation"), "POST", quotationData.value);
 
             console.log("Cotización creada con ID:", quotationId, "y Número de Cotización:", quotationNumber);
+
             await addProductsToQuotation(quotationId);
-            return {quotationId, quotationNumber};
+
             fetchQuotationCount();
+
+            return {quotationId, quotationNumber};
         } catch (error) {
             console.error("Error al crear la cotización:", error);
 
@@ -43,6 +55,8 @@
             } else {
                 errorMessage.value = "Error al crear la cotización.";
             }
+        } finally {
+            isSubmitting = false;
         }
     };
 
@@ -53,11 +67,13 @@
                 quantity: item.cantidad,
             }));
 
-            console.log("Añadiendo productos a la cotización:", quotationId, products);
+            console.log("Añadiendo productos a la cotización con ID:", quotationId);
+            console.table(products);
 
             const {quotationProducts} = await fetchWithAuth(apiurl("/user/carrito/addproductstoquotation"), "POST", {quotationId, products});
 
-            console.log("Productos agregados a la cotización:", quotationProducts);
+            console.log("Productos agregados a la cotización:");
+            console.table(quotationProducts);
             await addQuotationSupplierProducts(quotationId, quotationProducts);
         } catch (error) {
             console.error("Error al agregar productos a la cotización:", error);
@@ -66,20 +82,23 @@
 
     const addQuotationSupplierProducts = async (quotationId, quotationProducts) => {
         try {
+            console.log("Enviando productos a QuotationSupplierProducts:");
+            console.table(quotationProducts);
+
             const data = await fetchWithAuth(apiurl("/user/carrito/addquotationsupplierproducts"), "POST", {
                 quotationProducts,
                 quotationCount: supplierCount.value,
             });
 
-            console.log(data.message);
-            window.location.href = `/cotizaciones/${quotationId}`;
+            console.log("Respuesta recibida del servidor:");
+            console.table(data);
             vaciarCarritoUser();
             showMenu.value = false;
+            window.location.href = `/cotizaciones/${quotationId}`;
         } catch (error) {
             console.error("Error al agregar productos a QuotationSupplierProducts:", error);
         }
     };
-
     const handleCreateQuotation = async () => {
         await createQuotation();
     };
@@ -114,6 +133,7 @@
                     </div>
                 </div>
             </div>
+
             <div v-else>
                 <p>No hay productos en el carrito.</p>
             </div>

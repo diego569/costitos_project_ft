@@ -11,6 +11,8 @@
     const productSlug = route.params.slug;
     const categoryData = ref({category: null, subcategory: null});
 
+    const emit = defineEmits(["agregar"]);
+
     const products = ref([]);
 
     const fetchProductDetails = async () => {
@@ -23,8 +25,6 @@
             products.value = [data.data];
 
             productId.value = data.data.productId;
-
-            console.log("Product ID:", productId);
         } catch (error) {
             console.error(error);
         }
@@ -54,7 +54,20 @@
     };
 
     const agregarAlCarrito = (product) => {
-        agregarProducto(product, {unitOfMeasure: product.unitOfMeasure, cantidad: product.cantidad});
+        const productoFormateado = {
+            id: product.supplierProductId,
+            name: product.name,
+            description: product.description,
+            slug: product.slug,
+            photo: product.photo,
+            unitOfMeasure: product.unitOfMeasure,
+            isAuthorized: product.isAuthorized,
+        };
+
+        agregarProducto(productoFormateado, {
+            supplierProductId: product.id,
+            unitOfMeasure: product.unitOfMeasure,
+        });
         updateCantidadCarrito(product.id, product.unitOfMeasure, product.cantidad);
     };
 

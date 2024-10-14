@@ -61,7 +61,7 @@ export const obtenerCarrito = () => {
 };
 
 export const totalProductosSeleccionados = () => {
-    return carrito.reduce((total, item) => total + item.cantidad, 0);
+    return carrito.length;
 };
 
 export const vaciarCarrito = () => {
