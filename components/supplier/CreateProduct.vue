@@ -82,6 +82,7 @@
             console.error("Error al obtener unidades de medida", error);
         }
     };
+
     const fetchFeatures = async () => {
         try {
             const response = await fetchWithAuth(apiurl("/supplier/misproductos/getfeatures"), "GET");
@@ -95,22 +96,19 @@
         }
     };
 
-    // Añadir nueva característica
     const addFeatureInput = () => {
         selectedFeatures.value.push({featureId: "", value: ""});
     };
 
-    // Eliminar característica
     const removeFeatureInput = (index) => {
         selectedFeatures.value.splice(index, 1);
     };
 
-    // Asignar características al producto
     const assignFeaturesToProduct = async (productId) => {
         try {
             isLoading.value = true;
 
-            const validFeatures = selectedFeatures.value.filter((f) => f.featureId && f.value); // Validar entradas
+            const validFeatures = selectedFeatures.value.filter((f) => f.featureId && f.value);
 
             if (validFeatures.length === 0) {
                 throw new Error("Debe seleccionar al menos una característica con valor.");
@@ -314,7 +312,7 @@
 
                 <div>
                     <UiLabel forId="price" text="Precio:" />
-                    <UiInput id="price" v-model="supplierProduct.price" type="text" placeholder="Escribe el precio" oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');" required />
+                    <UiInput id="price" v-model="supplierProduct.price" type="text" placeholder="Escribe el precio" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" required />
                 </div>
 
                 <div>

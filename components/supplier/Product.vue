@@ -1,10 +1,10 @@
 <script setup>
     import {ref} from "vue";
     import {defineProps, defineEmits} from "vue";
+    import {TrashIcon} from "@heroicons/vue/24/solid";
 
     const props = defineProps({
         product: Object,
-        updatePrice: Function,
     });
 
     const emit = defineEmits(["agregar"]);
@@ -14,11 +14,46 @@
     const handleImageLoad = () => {
         isLoading.value = false;
     };
+
+    const selectedProduct = ref(null);
+    const showProductDetailModal = ref(false);
+
+    const openProductDetailModal = () => {
+        selectedProduct.value = props.product;
+        showProductDetailModal.value = true;
+    };
+
+    const closeProductDetailModal = () => {
+        showProductDetailModal.value = false;
+    };
+
+    const selectedSupplierProductId = ref(null);
+    const selectedProductName = ref(null);
+    const showDeleteModal = ref(false);
+
+    const openDeleteModal = (product) => {
+        selectedSupplierProductId.value = product.supplier_product_id;
+        selectedProductName.value = product.name;
+        showDeleteModal.value = true;
+    };
+
+    const closeDeleteModal = () => {
+        showDeleteModal.value = false;
+    };
+
+    const handleProductDeleted = () => {
+        showDeleteModal.value = false;
+        window.location.reload();
+    };
 </script>
 
 <template>
     <div class="relative flex flex-col justify-between rounded-xl bg-white bg-clip-border p-2 text-gray-700 transition-all duration-200 hover:shadow-md">
-        <NuxtLink class="pointer">
+        <button @click="openDeleteModal(product)" class="absolute right-3 top-3 z-10 rounded-full border border-gray-200 bg-gray-100 p-1 hover:bg-red-500 hover:text-white">
+            <TrashIcon class="h-5 w-5" />
+        </button>
+
+        <div @click="openProductDetailModal">
             <div class="relative aspect-square overflow-hidden rounded-xl bg-white bg-clip-border text-gray-700">
                 <img v-show="!isLoading" :src="product.photo" @load="handleImageLoad" alt="card-image" class="h-full w-full object-cover object-center" />
                 <div v-show="isLoading" class="flex h-full w-full animate-pulse items-center justify-center bg-gray-200">
@@ -34,12 +69,17 @@
                 </div>
                 <p class="line-clamp-2 font-sans text-xs font-normal leading-normal text-gray-700 antialiased opacity-75 sm:line-clamp-3">{{ product.description }}</p>
             </div>
-        </NuxtLink>
+        </div>
+
         <div class="flex justify-between p-2">
             <div class="line-clamp-2 font-sans text-sm font-medium leading-relaxed text-gray-900 antialiased">S/. {{ product.price }}</div>
-            <div class="line-clamp-2 font-sans text-sm font-medium leading-relaxed text-gray-900 antialiased">
-                {{ product.unitOfMeasure }}
-            </div>
+            <div class="line-clamp-2 font-sans text-sm font-medium leading-relaxed text-gray-900 antialiased">{{ product.unit_of_measure }}</div>
         </div>
     </div>
+
+    <!-- Modal para ver detalles del producto -->
+    <SupplierProductView :showModal="showProductDetailModal" :product="selectedProduct" :closeModal="closeProductDetailModal" />
+
+    <!-- Modal para eliminar producto -->
+    <SupplierDeleteProduct :showModal="showDeleteModal" :supplierProductId="selectedSupplierProductId" :productName="selectedProductName" :closeModal="closeDeleteModal" @productDeleted="handleProductDeleted" />
 </template>

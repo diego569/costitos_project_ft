@@ -1,7 +1,6 @@
 <script setup>
     import {ref, onMounted} from "vue";
     import {fetchWithAuth, getUserId} from "@/services/auth";
-    import {TransitionRoot, TransitionChild} from "@headlessui/vue";
     import {apiurl} from "~/services/api.js";
 
     const supplierId = getUserId();
@@ -140,6 +139,7 @@
         showModal.value = false;
     };
 
+    // Actualiza la lista de productos al agregar o editar un producto
     const updateProductList = () => {
         if (selectedSubcategory.value) {
             fetchProductsBySupplierAndSubcategory(selectedSubcategory.value);

@@ -98,12 +98,10 @@
                                     <li v-for="feature in features" :key="feature.id" class="mt-2">
                                         <Disclosure as="div" class="mt-2" v-slot="{open}">
                                             <DisclosureButton class="flex w-full justify-between rounded-lg bg-gray-50 px-4 py-2 text-left text-sm font-medium text-gray-900 hover:bg-gray-200 focus:outline-none focus-visible:ring focus-visible:ring-gray-500/75">
-                                                <span>{{ feature.name }}: {{ feature.value }}</span>
+                                                <span>{{ feature.name }}: {{ feature.value }} </span>
                                                 <ChevronUpIcon :class="{'rotate-180 transform': !open}" class="h-5 w-5 text-gray-500" />
                                             </DisclosureButton>
-                                            <DisclosurePanel class="px-4 pb-2 pt-4 text-sm text-gray-500">
-                                                {{ feature.description }}
-                                            </DisclosurePanel>
+                                            <DisclosurePanel class="px-4 pb-2 pt-4 text-sm text-gray-500"> {{ feature.description }}dwad </DisclosurePanel>
                                         </Disclosure>
                                     </li>
                                 </ul>
