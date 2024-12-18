@@ -80,7 +80,7 @@
         }, 0);
     };
 
-    const cart = ref(getCart()); // Obtener el carrito usando la función de auth.js
+    const cart = ref(getCart());
 
     const newQuotationName = ref("");
     const isModalOpen = ref(false);
@@ -120,13 +120,12 @@
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet("Cotización");
 
-        // Configuración de estilos
         const headerStyle = {
-            font: {size: 13, bold: true, color: {argb: "FF000000"}}, // Negro oscuro
+            font: {size: 13, bold: true, color: {argb: "FF000000"}},
             alignment: {vertical: "middle", horizontal: "center", wrapText: true},
-            fill: {type: "pattern", pattern: "solid", fgColor: {argb: "FFCCCCCC"}}, // Background color
+            fill: {type: "pattern", pattern: "solid", fgColor: {argb: "FFCCCCCC"}},
             border: {
-                top: {style: "thin", color: {argb: "FF374151"}}, // Gray-700 border solid
+                top: {style: "thin", color: {argb: "FF374151"}},
                 left: {style: "thin", color: {argb: "FF374151"}},
                 bottom: {style: "thin", color: {argb: "FF374151"}},
                 right: {style: "thin", color: {argb: "FF374151"}},
@@ -134,10 +133,10 @@
         };
 
         const cellStyle = {
-            font: {size: 12, color: {argb: "FF000000"}}, // Negro oscuro
+            font: {size: 12, color: {argb: "FF000000"}},
             alignment: {vertical: "middle", wrapText: true},
             border: {
-                top: {style: "thin", color: {argb: "FF374151"}}, // Gray-700 border solid
+                top: {style: "thin", color: {argb: "FF374151"}},
                 left: {style: "thin", color: {argb: "FF374151"}},
                 bottom: {style: "thin", color: {argb: "FF374151"}},
                 right: {style: "thin", color: {argb: "FF374151"}},
@@ -150,12 +149,11 @@
         };
 
         const bgHighlightStyle = {
-            fill: {type: "pattern", pattern: "solid", fgColor: {argb: "FFCCCCCC"}}, // Background color
+            fill: {type: "pattern", pattern: "solid", fgColor: {argb: "FFCCCCCC"}},
         };
 
-        // Nombre de la cotización y fecha
-        worksheet.mergeCells("A1", `F1`); // Ajusta el rango de celdas según el número total de columnas que tengas
-        worksheet.mergeCells("A2", `F2`); // Ajusta el rango de celdas según el número total de columnas que tengas
+        worksheet.mergeCells("A1", `F1`);
+        worksheet.mergeCells("A2", `F2`);
 
         const row1 = worksheet.getCell("A1");
         row1.value = `Cotización: ${quotationName.value}`;
@@ -169,59 +167,56 @@
         row2.alignment = {vertical: "middle", horizontal: "center"};
         row2.height = 25;
 
-        worksheet.addRow([]); // Espacio entre tablas
+        worksheet.addRow([]);
 
-        // Información de proveedores
         const supplierHeaders = ["Nombre o razón social", "", "", ...uniqueSuppliers.value.map((supplier) => supplier.supplierName)];
         const supplierRUC = ["RUC", "", "", ...uniqueSuppliers.value.map((supplier) => supplier.supplierRuc)];
         const supplierAddress = ["Domicilio fiscal", "", "", ...uniqueSuppliers.value.map((supplier) => supplier.supplierAddress)];
         const supplierContact = ["Contactar al proveedor", "", "", ...uniqueSuppliers.value.map((supplier) => supplier.supplierPhone)];
 
         const supplierHeaderRow = worksheet.addRow(supplierHeaders);
-        supplierHeaderRow.getCell(1).style = {...headerStyle, ...bgHighlightStyle}; // Solo la primera celda tiene bg
+        supplierHeaderRow.getCell(1).style = {...headerStyle, ...bgHighlightStyle};
         supplierHeaderRow.eachCell((cell, colNumber) => {
             if (colNumber > 1 && cell.value) {
-                cell.style = headerStyle; // Aplica bordes solo a celdas con texto
+                cell.style = headerStyle;
             }
         });
         supplierHeaderRow.height = 25;
 
         const supplierRUCRow = worksheet.addRow(supplierRUC);
-        supplierRUCRow.getCell(1).style = {...cellStyle, ...bgHighlightStyle}; // Solo la primera celda tiene bg
+        supplierRUCRow.getCell(1).style = {...cellStyle, ...bgHighlightStyle};
         supplierRUCRow.eachCell((cell, colNumber) => {
             if (colNumber > 1 && cell.value) {
-                cell.style = cellStyle; // Aplica bordes solo a celdas con texto
+                cell.style = cellStyle;
             }
         });
         supplierRUCRow.height = 20;
 
         const supplierAddressRow = worksheet.addRow(supplierAddress);
-        supplierAddressRow.getCell(1).style = {...cellStyle, ...bgHighlightStyle}; // Solo la primera celda tiene bg
+        supplierAddressRow.getCell(1).style = {...cellStyle, ...bgHighlightStyle};
         supplierAddressRow.eachCell((cell, colNumber) => {
             if (colNumber > 1 && cell.value) {
-                cell.style = cellStyle; // Aplica bordes solo a celdas con texto
+                cell.style = cellStyle;
             }
         });
         supplierAddressRow.height = 20;
 
         const supplierContactRow = worksheet.addRow(supplierContact);
-        supplierContactRow.getCell(1).style = {...cellStyle, ...bgHighlightStyle}; // Solo la primera celda tiene bg
+        supplierContactRow.getCell(1).style = {...cellStyle, ...bgHighlightStyle};
         supplierContactRow.eachCell((cell, colNumber) => {
             if (colNumber > 1 && cell.value) {
-                cell.style = cellStyle; // Aplica bordes solo a celdas con texto
+                cell.style = cellStyle;
             }
         });
         supplierContactRow.height = 20;
 
-        worksheet.addRow([]); // Espacio entre tablas
+        worksheet.addRow([]);
 
-        // Combinar las primeras tres celdas para "Nombre o razón social"
         worksheet.mergeCells(supplierHeaderRow.number, 1, supplierHeaderRow.number, 3);
         worksheet.mergeCells(supplierRUCRow.number, 1, supplierRUCRow.number, 3);
         worksheet.mergeCells(supplierAddressRow.number, 1, supplierAddressRow.number, 3);
         worksheet.mergeCells(supplierContactRow.number, 1, supplierContactRow.number, 3);
 
-        // Cabeceras para productos
         const headers = ["Descripción", "Unidad", "Cantidad"];
         uniqueSuppliers.value.forEach(() => {
             headers.push("P.U.");
@@ -234,9 +229,8 @@
                 cell.style = {...headerStyle, ...bgHighlightStyle};
             }
         });
-        headerRow.height = 25; // Mayor altura para cabeceras
+        headerRow.height = 25;
 
-        // Productos
         uniqueProducts.value.forEach((product) => {
             const rowValues = [product.productName, product.productUnitOfMeasure, product.productQuantity];
 
@@ -250,19 +244,16 @@
             const row = worksheet.addRow(rowValues);
             row.eachCell((cell, colNumber) => {
                 if (colNumber > 3 && colNumber <= 3 + uniqueSuppliers.value.length && cell.value) {
-                    // Aplicar estilo centrado solo a las celdas P.U.
                     cell.style = puCellStyle;
                 } else if (cell.value) {
                     cell.style = cellStyle;
                 }
             });
 
-            // Ajuste de altura basado en el contenido
             const descriptionLength = row.getCell(1).value.length;
-            row.height = descriptionLength > 30 ? Math.ceil(descriptionLength / 30) * 25 : 25; // Mayor altura para contenido
+            row.height = descriptionLength > 30 ? Math.ceil(descriptionLength / 30) * 25 : 25;
         });
 
-        // Totales
         const totalRowValues = new Array(3 + uniqueSuppliers.value.length).fill("");
         totalRowValues.push(`S/. ${totalLowerPrice.value.toLocaleString()}`, `S/. ${totalLowerPriceWithQuantity.value.toLocaleString()}`);
         const totalRow = worksheet.addRow(totalRowValues);
@@ -271,16 +262,15 @@
                 cell.style = headerStyle;
             }
         });
-        totalRow.height = 25; // Mayor altura para la fila de totales
+        totalRow.height = 25;
 
-        // Ajustar el ancho de las columnas
         worksheet.columns.forEach((column, index) => {
             if (index === 0) {
-                column.width = 60; // Ancho para la primera columna
+                column.width = 60;
             } else if (index === 1 || index === 2) {
-                column.width = 20; // Ancho para la segunda y tercera columna
+                column.width = 20;
             } else {
-                column.width = 20; // Ancho estándar para las demás columnas
+                column.width = 20;
             }
         });
 
@@ -291,20 +281,21 @@
 </script>
 <template>
     <div class="flex items-center">
-        <NuxtLink to="/cotizaciones" class="inline-flex items-center rounded py-2 text-primary-600 hover:text-primary-800">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="mr-2 h-4 w-4">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Volver a Cotizaciones
+        <NuxtLink to="/misproyectos" class="inline-flex items-center rounded py-2 text-gray-500 hover:text-primary-800">
+            <Icon name="my-icon:arrow-back" size="15" />
+            Volver a mis proyectos
         </NuxtLink>
     </div>
-
     <div class="bg-white md:p-4">
         <div>
             <h2 class="px-4 py-2 text-xl font-bold md:text-center">
                 {{ quotationName }}
-                <button @click="openModal" class="ml-4 text-sm text-blue-500 hover:underline">Editar</button>
-                <button @click="exportToExcel" class="ml-4 text-sm text-primary-500 hover:underline">Imprimir</button>
+                <button @click="openModal" class="ml-4 text-sm text-blue-500 hover:underline">
+                    <Icon name="my-icon:pencil-simple" size="20" class="mr-2 hover:text-red-400" />
+                </button>
+                <button @click="exportToExcel" class="ml-4 text-sm text-primary-500 hover:underline">
+                    <Icon name="my-icon:printer" size="20" class="mr-2 hover:text-red-400" />
+                </button>
             </h2>
 
             <div v-if="isModalOpen" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">

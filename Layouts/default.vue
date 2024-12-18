@@ -40,9 +40,13 @@
         }
     });
 
+    // const navigation = [
+    //     {name: "Catalogo", href: "/catalogo", icon: RectangleGroupIcon},
+    //     {name: "Proveedores", href: "/proveedores", icon: UserGroupIcon},
+    // ];
     const navigation = [
-        {name: "Catalogo", href: "/catalogo", icon: RectangleGroupIcon},
-        {name: "Proveedores", href: "/proveedores", icon: UserGroupIcon},
+        {name: "Catalogo", href: "/catalogo", icon: "my-icon:catalog"},
+        {name: "Proveedores", href: "/proveedores", icon: "my-icon:fluent-person"},
     ];
 </script>
 
@@ -64,7 +68,7 @@
                             :to="item.href"
                             :class="[$route.path === item.href ? 'border-b-2 border-primary-500 text-black' : 'border-transparent hover:border-b-2 hover:border-primary-500 hover:text-black', 'flex h-full items-center border-b-2 px-1.5 text-sm font-normal']"
                             :aria-current="$route.path === item.href ? 'page' : undefined">
-                            <component :is="item.icon" :class="[$route.path === item.href ? 'stroke-primary-500' : ' ', 'mr-2 h-6 w-6']" aria-hidden="true" />
+                            <Icon :name="item.icon" size="20" class="mr-2" />
                             {{ item.name }}
                         </router-link>
                     </div>
@@ -78,10 +82,10 @@
                             <NuxtLink to="/precios" class="text-blue-400 transition-all duration-200 hover:text-blue-700">Obtener más</NuxtLink>
                         </div>
                     </div>
-                    <button type="button" class="relative rounded-md bg-gray-100 p-1.5 text-gray-600 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-100" @click="$emit('toggle-menu')">
+                    <button type="button" class="relative rounded-md px-2.5 text-gray-600 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-100" @click="$emit('toggle-menu')">
                         <span class="sr-only">Carrito</span>
-                        <ShoppingCartIcon class="h-6 w-6 text-gray-500" />
-                        <span v-if="totalProductos > 0" class="absolute right-0 top-0 inline-flex items-center justify-center rounded-full bg-primary-600 px-1.5 py-1 text-xs font-light leading-none text-red-100">
+                        <Icon name="my-icon:shopping-cart" size="20" />
+                        <span v-if="totalProductos > 0" class="absolute -right-1 -top-2 inline-flex items-center justify-center rounded-full bg-primary-600 px-1.5 py-0.5 text-xs font-light leading-none text-red-100">
                             {{ totalProductos }}
                         </span>
                     </button>
@@ -91,10 +95,9 @@
                             <button @click="navigateToLogin" class="relative inline-flex items-center rounded-md bg-gray-100 px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-200 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-gray-500">Ingresar</button>
                         </div>
                         <div v-else class="flex items-center">
-                            <MenuButton class="relative flex items-center rounded-md bg-gray-100 px-3 py-1.5 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-100">
+                            <MenuButton class="relative flex rounded-md p-2 px-2.5 text-gray-600 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-100">
                                 <span class="sr-only">Open user menu</span>
-                                <UserIcon class="h-6 w-6 text-gray-500" />
-                                <span class="ml-2 hidden md:block">{{ user?.name }}</span>
+                                <Icon name="my-icon:user" size="20" />
                             </MenuButton>
                         </div>
                         <transition
@@ -105,14 +108,15 @@
                             leave-from-class="transform opacity-100 scale-100"
                             leave-to-class="transform opacity-0 scale-95">
                             <MenuItems class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                                <MenuItem v-slot="{active}">
-                                    <a href="/cotizaciones" :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']"> Mis cotizaciones </a>
+                                <MenuItem as="div" class="block border-b px-4 py-2 text-center text-sm text-gray-700"> Hola, {{ user?.name }} </MenuItem>
+                                <MenuItem v-slot="{active}" class="flex items-center gap-2">
+                                    <a href="/misproyectos" :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']"> <Icon name="my-icon:pricing-quotation" size="15" />Mis proyectos </a>
                                 </MenuItem>
-                                <MenuItem v-slot="{active}">
-                                    <a href="#" :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']"> Mi perfil </a>
+                                <MenuItem v-slot="{active}" class="flex items-center gap-2">
+                                    <a href="/miperfil" :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']"><Icon name="my-icon:user" size="15" /> Mi perfil </a>
                                 </MenuItem>
-                                <MenuItem v-slot="{active}">
-                                    <a href="#" @click="handleLogout" :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']"> Salir </a>
+                                <MenuItem v-slot="{active}" class="flex items-center gap-2">
+                                    <a href="#" @click="handleLogout" :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']"> <Icon name="my-icon:sign-out" size="15" /> Salir </a>
                                 </MenuItem>
                             </MenuItems>
                         </transition>
@@ -157,7 +161,7 @@
                             :href="item.href"
                             :class="[$route.path === item.href ? 'bg-primary-100 text-gray-800' : 'text-gray-600 hover:bg-gray-200 hover:text-gray-800', 'flex rounded-md px-3 py-2 text-base font-medium']"
                             :aria-current="$route.path === item.href ? 'page' : undefined">
-                            <component :is="item.icon" :class="[$route.path === item.href ? 'stroke-primary-500' : ' ', 'mr-2 h-6 w-6']" aria-hidden="true" />
+                            <Icon :name="item.icon" size="20" class="mr-2" />
                             {{ item.name }}
                         </DisclosureButton>
                     </div>

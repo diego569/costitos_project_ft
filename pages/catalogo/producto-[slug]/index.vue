@@ -3,17 +3,16 @@
     import {useRoute} from "vue-router";
     import {Disclosure, DisclosureButton, DisclosurePanel} from "@headlessui/vue";
     import {ChevronUpIcon} from "@heroicons/vue/20/solid";
-    import {agregarProducto, updateCantidad as updateCantidadCarrito, incrementarCantidad as incrementarCantidadCarrito, decrementarCantidad as decrementarCantidadCarrito} from "~/services/usercart";
+    import {agregarProducto} from "~/services/usercart";
     import {apiurl} from "~/services/api.js";
     import {fetchWithAuth} from "~/services/auth.js";
-    const productId = ref(null);
+
     const route = useRoute();
     const productSlug = route.params.slug;
     const categoryData = ref({category: null, subcategory: null});
 
-    const emit = defineEmits(["agregar"]);
-
     const products = ref([]);
+    const productId = ref(null);
 
     const fetchProductDetails = async () => {
         try {
@@ -21,12 +20,20 @@
             if (!response.ok) throw new Error("Failed to fetch product details");
 
             const data = await response.json();
-            data.data.cantidad = 1;
-            products.value = [data.data];
 
-            productId.value = data.data.productId;
+            if (data && data.data) {
+                products.value = [
+                    {
+                        ...data.data,
+                        cantidad: 1,
+                    },
+                ];
+                productId.value = data.data.productId;
+            } else {
+                console.warn("No se encontraron detalles del producto.");
+            }
         } catch (error) {
-            console.error(error);
+            console.error("Error fetching product details:", error);
         }
     };
     const fetchProductCategoryAndSubcategory = async (productId) => {
@@ -47,40 +54,22 @@
         }
     };
 
-    const updateCantidad = (product) => {
-        if (product.cantidad < 1) {
-            product.cantidad = 1;
-        }
-    };
-
     const agregarAlCarrito = (product) => {
-        const productoFormateado = {
-            id: product.supplierProductId,
-            name: product.name,
-            description: product.description,
-            slug: product.slug,
-            photo: product.photo,
-            unitOfMeasure: product.unitOfMeasure,
-            isAuthorized: product.isAuthorized,
-        };
-
-        agregarProducto(productoFormateado, {
-            supplierProductId: product.id,
+        agregarProducto(product, {
             unitOfMeasure: product.unitOfMeasure,
         });
-        updateCantidadCarrito(product.id, product.unitOfMeasure, product.cantidad);
     };
 
     onMounted(async () => {
         await fetchProductDetails();
-
         if (productId.value) {
             await fetchProductCategoryAndSubcategory(productId.value);
         }
     });
 </script>
+
 <template>
-    <nav class="flex" aria-label="Breadcrumb">
+    <nav class="flex h-fit py-3" aria-label="Breadcrumb">
         <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
             <li class="inline-flex items-center">
                 <NuxtLink to="/" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-primary-600">
@@ -112,41 +101,36 @@
     </nav>
 
     <div class="mx-auto max-w-screen-lg bg-white p-2 font-sans sm:p-4">
-        <div v-for="product in products" :key="product.id">
+        <div v-for="product in products" :key="product.supplierProductId">
             <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
                 <div class="flex justify-center">
-                    <div class="flex aspect-square h-96 items-center justify-center text-center">
-                        <img :src="product.photo" alt="product image" class="aspect-square size-full rounded-md object-cover" />
-                    </div>
+                    <img :src="product.photo" alt="Imagen del producto" class="h-96 w-96 rounded-md object-cover" />
                 </div>
 
                 <div>
-                    <div class="flex flex-wrap items-start gap-4">
-                        <p class="text-2xl font-semibold">{{ product.name }} - {{ product.unitOfMeasure }}</p>
-                        <p class="text-sm">{{ product.description }}</p>
+                    <h1 class="text-2xl font-semibold">{{ product.name }} - {{ product.unitOfMeasure }}</h1>
+                    <p class="mt-2 text-sm text-gray-600">{{ product.description }}</p>
+
+                    <div class="mt-4 flex items-center gap-2">
+                        <button @click="decrementarCantidad(product)" class="h-10 w-10 rounded bg-gray-200">-</button>
+                        <input type="number" v-model.number="product.cantidad" class="w-12 rounded border text-center" />
+                        <button @click="incrementarCantidad(product)" class="h-10 w-10 rounded bg-gray-200">+</button>
                     </div>
 
-                    <hr class="my-8" />
-
-                    <div class="flex gap-2">
-                        <div class="mt-4 flex items-center">
-                            <button @click="decrementarCantidad(product)" class="h-10 w-10 rounded-lg bg-gray-200 text-gray-700">-</button>
-                            <input type="number" v-model.number="product.cantidad" class="mx-2 h-10 w-16 rounded-lg border border-gray-200 bg-white text-center text-gray-900" @change="updateCantidad(product)" />
-                            <button @click="incrementarCantidad(product)" class="h-10 w-10 rounded-lg bg-gray-200 text-gray-700">+</button>
-                        </div>
-                        <button @click="agregarAlCarrito(product)" class="mt-4 w-full rounded bg-primary-500 p-2 text-white">Añadir</button>
+                    <div class="mt-4">
+                        <button @click="agregarAlCarrito(product)" class="rounded-lg bg-primary-500 px-4 py-2 text-white hover:bg-primary-600">Añadir al Carrito</button>
                     </div>
                 </div>
             </div>
 
-            <div class="mt-6">
+            <div v-if="product.features && product.features.length" class="mt-6">
                 <h2 class="text-xl font-semibold">Características</h2>
                 <ul class="mt-2">
                     <li v-for="feature in product.features" :key="feature.id" class="mt-2">
                         <Disclosure as="div" class="mt-2" v-slot="{open}">
                             <DisclosureButton class="flex w-full justify-between rounded-lg bg-gray-50 px-4 py-2 text-left text-sm font-medium text-gray-900 hover:bg-gray-200 focus:outline-none focus-visible:ring focus-visible:ring-gray-500/75">
                                 <span>{{ feature.name }}: {{ feature.value }}</span>
-                                <ChevronUpIcon :class="{'rotate-180 transform': !open}" class="h-5 w-5 text-gray-500" />
+                                <ChevronUpIcon :class="{'rotate-180 transform': open}" class="h-5 w-5 text-gray-500" />
                             </DisclosureButton>
                             <DisclosurePanel class="px-4 pb-2 pt-4 text-sm text-gray-500">
                                 {{ feature.description }}

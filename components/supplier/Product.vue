@@ -1,7 +1,6 @@
 <script setup>
     import {ref} from "vue";
     import {defineProps, defineEmits} from "vue";
-    import {TrashIcon} from "@heroicons/vue/24/solid";
 
     const props = defineProps({
         product: Object,
@@ -49,8 +48,8 @@
 
 <template>
     <div class="relative flex flex-col justify-between rounded-xl bg-white bg-clip-border p-2 text-gray-700 transition-all duration-200 hover:shadow-md">
-        <button @click="openDeleteModal(product)" class="absolute right-3 top-3 z-10 rounded-full border border-gray-200 bg-gray-100 p-1 hover:bg-red-500 hover:text-white">
-            <TrashIcon class="h-5 w-5" />
+        <button @click="openDeleteModal(product)" class="absolute right-3 top-3 z-10 rounded-lg border border-gray-200 bg-white/70 p-1.5 transition hover:bg-red-500 hover:text-white">
+            <Icon name="my-icon:trash" size="20" />
         </button>
 
         <div @click="openProductDetailModal">
@@ -77,9 +76,7 @@
         </div>
     </div>
 
-    <!-- Modal para ver detalles del producto -->
     <SupplierProductView :showModal="showProductDetailModal" :product="selectedProduct" :closeModal="closeProductDetailModal" />
 
-    <!-- Modal para eliminar producto -->
     <SupplierDeleteProduct :showModal="showDeleteModal" :supplierProductId="selectedSupplierProductId" :productName="selectedProductName" :closeModal="closeDeleteModal" @productDeleted="handleProductDeleted" />
 </template>

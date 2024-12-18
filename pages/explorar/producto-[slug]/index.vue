@@ -1,3 +1,50 @@
+<script setup>
+    import {ref, onMounted} from "vue";
+    import {useRoute} from "vue-router";
+    import {obtenerCarrito, agregarProducto, incrementarCantidad as incrementarCantidadCarrito, decrementarCantidad as decrementarCantidadCarrito, updateCantidad as updateCantidadCarrito} from "~/services/usercart";
+    import {apiurl} from "~/services/api.js";
+
+    const route = useRoute();
+    const productSlug = route.params.slug;
+
+    const products = ref([]);
+
+    const fetchProductDetails = async () => {
+        try {
+            const response = await fetch(apiurl(`/user/getproductdetailsbysupplierproductslug/${productSlug}`));
+            if (!response.ok) throw new Error("Failed to fetch product details");
+
+            const data = await response.json();
+            data.data.cantidad = 1;
+            products.value = [data.data];
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const incrementarCantidad = (product) => {
+        product.cantidad += 1;
+    };
+
+    const decrementarCantidad = (product) => {
+        if (product.cantidad > 1) {
+            product.cantidad -= 1;
+        }
+    };
+
+    const updateCantidad = (product) => {
+        if (product.cantidad < 1) {
+            product.cantidad = 1;
+        }
+    };
+
+    const agregarAlCarrito = (product) => {
+        agregarProducto(product, {unitOfMeasure: product.unitOfMeasure, cantidad: product.cantidad});
+        updateCantidadCarrito(product.id, product.unitOfMeasure, product.cantidad);
+    };
+
+    onMounted(fetchProductDetails);
+</script>
 <template>
     <div class="bg-white p-2 font-sans sm:p-4">
         <div v-for="product in products" :key="product.id">
@@ -49,55 +96,3 @@
         </div>
     </div>
 </template>
-
-<script setup>
-    import {ref, onMounted} from "vue";
-    import {useRoute} from "vue-router";
-    import {obtenerCarrito, agregarProducto, incrementarCantidad as incrementarCantidadCarrito, decrementarCantidad as decrementarCantidadCarrito, updateCantidad as updateCantidadCarrito} from "~/services/usercart";
-    import {apiurl} from "~/services/api.js";
-
-    const route = useRoute();
-    const productSlug = route.params.slug;
-
-    const products = ref([]);
-
-    const fetchProductDetails = async () => {
-        try {
-            const response = await fetch(apiurl(`/user/getproductdetailsbysupplierproductslug/${productSlug}`));
-            if (!response.ok) throw new Error("Failed to fetch product details");
-
-            const data = await response.json();
-            data.data.cantidad = 1;
-            products.value = [data.data];
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    const incrementarCantidad = (product) => {
-        product.cantidad += 1;
-    };
-
-    const decrementarCantidad = (product) => {
-        if (product.cantidad > 1) {
-            product.cantidad -= 1;
-        }
-    };
-
-    const updateCantidad = (product) => {
-        if (product.cantidad < 1) {
-            product.cantidad = 1;
-        }
-    };
-
-    const agregarAlCarrito = (product) => {
-        agregarProducto(product, {unitOfMeasure: product.unitOfMeasure, cantidad: product.cantidad});
-        updateCantidadCarrito(product.id, product.unitOfMeasure, product.cantidad);
-    };
-
-    onMounted(fetchProductDetails);
-</script>
-
-<style scoped>
-    /* Añade cualquier estilo adicional aquí si es necesario */
-</style>

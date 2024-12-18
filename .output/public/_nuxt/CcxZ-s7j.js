@@ -1,1 +1,0 @@
-import{Q as o,e as t,R as r}from"./QSVr_bxC.js";const p={__name:"index",setup(n){const e=o();t(async()=>{await a()});const a=async()=>{const s=await r();s==="user"?e.push({name:"catalogo"}):s==="supplier"?e.push({name:"explorar"}):e.push({name:"catalogo"})};return()=>{}}};export{p as default};

@@ -2,7 +2,6 @@
     import {ref, onMounted} from "vue";
     import {fetchWithAuth, getUserId} from "@/services/auth";
     import {apiurl} from "~/services/api.js";
-
     const supplierId = getUserId();
 
     const categories = ref([]);
@@ -15,6 +14,8 @@
     const isLoadingSearchResults = ref(false);
     const selectedCategory = ref(null);
     const selectedSubcategory = ref(null);
+
+    const selectedProductId = ref(null); // Nuevo: Controlar el productId seleccionado para el modal
 
     const fetchCategoriesBySupplier = async () => {
         try {
@@ -157,15 +158,19 @@
             <h6 class="p-3 text-lg font-bold">Categorías</h6>
             <div class="overflow-auto">
                 <div v-for="category in categories" :key="category.id">
-                    <div @click="selectCategory(category)" :class="{'text-black': selectedCategory === category.id, 'text-gray-600': selectedCategory !== category.id}" class="flex cursor-pointer items-center justify-start border-t p-2 hover:bg-primary-200">
+                    <div @click="selectCategory(category)" :class="{'text-black': selectedCategory === category.id, 'text-gray-600': selectedCategory !== category.id}" class="flex cursor-pointer border-t p-2 hover:bg-primary-200">
                         <div class="flex items-center gap-2">
-                            <div class="flex h-full w-full items-center justify-center">
-                                <Icon :name="selectedCategory === category.id ? 'my-icon:caret-down' : 'my-icon:caret-right'" size="20" />
+                            <div class="flex items-center">
+                                <Icon name="my-icon:caret-right" size="15" :class="['mx-2 transform transition-transform duration-300', selectedCategory === category.id ? 'rotate-90' : 'rotate-0']" />
                             </div>
-                            <div class="flex h-full w-full items-center justify-center">
+
+                            <div class="flex items-center">
                                 <Icon :name="selectedCategory === category.id ? 'my-icon:folder-open' : 'my-icon:folder-close'" size="20" />
                             </div>
-                            <p class="select-none font-sans text-xs font-normal leading-normal antialiased">{{ category.name }}</p>
+
+                            <p class="select-none font-sans text-xs font-normal leading-normal antialiased">
+                                {{ category.name }}
+                            </p>
                         </div>
                     </div>
                     <TransitionRoot :show="selectedCategory === category.id" as="template">
@@ -185,6 +190,7 @@
                                     :class="{'bg-primary-500 text-white': selectedSubcategory === subcategory.id, 'text-gray-600 hover:bg-primary-200': selectedSubcategory !== subcategory.id}"
                                     class="cursor-pointer border-t p-2 text-gray-400">
                                     <div class="flex items-center gap-2">
+                                        <Icon name="my-icon:arrow-line" size="20" />
                                         <Icon name="my-icon:circles-four" size="20" />
                                         <p class="select-none font-sans text-xs font-normal leading-normal antialiased">{{ subcategory.name }}</p>
                                     </div>
@@ -202,7 +208,7 @@
             <div v-else>
                 <div class="mb-4 flex justify-between">
                     <h6 class="p-1.5 text-lg font-bold">{{ selectedSubcategory ? "Buscar Productos en Subcategoría" : selectedCategory ? "Buscar Productos en Categoría" : "Buscar Productos" }}</h6>
-                    <UiButton variant="primary" @click="openModal" defaultText="Agregar nuevo producto" />
+                    <UiButton variant="primary" @click="openModal" defaultText="+ Agregar nuevo producto" />
                 </div>
                 <UiInput id="search" type="text" v-model="searchQuery" @input="searchProducts" :placeholder="selectedSubcategory ? 'Buscar productos en subcategoría...' : selectedCategory ? 'Buscar productos en categoría...' : 'Buscar productos...'" />
                 <div v-if="isLoadingSearchResults">

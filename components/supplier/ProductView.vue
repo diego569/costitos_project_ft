@@ -4,7 +4,7 @@
     import {fetchWithAuth} from "@/services/auth";
     import {apiurl} from "~/services/api.js";
     import {Disclosure, DisclosureButton, DisclosurePanel} from "@headlessui/vue";
-    import {ChevronUpIcon, PencilIcon} from "@heroicons/vue/20/solid"; // Íconos
+    import {ChevronUpIcon, PencilIcon} from "@heroicons/vue/20/solid";
 
     const props = defineProps({
         showModal: Boolean,
@@ -21,7 +21,6 @@
     const isEditingUnit = ref(false);
     const isLoadingFeatures = ref(false);
 
-    // Fetch features
     const fetchProductFeatures = async () => {
         isLoadingFeatures.value = true;
         try {
@@ -34,7 +33,6 @@
         }
     };
 
-    // Fetch units of measure
     const fetchUnitOfMeasures = async () => {
         try {
             const response = await fetchWithAuth(apiurl("/supplier/misproductos/getunitofmeasures"), "GET");
@@ -82,7 +80,6 @@
         }
     };
 
-    // Watch for modal open
     watch(
         () => props.showModal,
         (newValue) => {
@@ -109,7 +106,6 @@
                         <DialogPanel class="w-full max-w-3xl transform overflow-hidden rounded-lg bg-white p-6 text-left align-middle shadow-xl transition-all">
                             <DialogTitle as="h3" class="text-lg font-medium leading-6 text-gray-900">Vista del Producto</DialogTitle>
                             <hr class="mb-4" />
-
                             <div class="mt-2 flex flex-col md:flex-row">
                                 <div class="mb-8 w-full md:w-1/3 md:pr-4">
                                     <img :src="product.photo" alt="product image" class="aspect-square size-full rounded-md object-cover" />
@@ -126,10 +122,10 @@
 
                                     <!-- Edit Price -->
                                     <div class="flex items-center">
-                                        <p v-if="!isEditingPrice" class="text-md">
+                                        <p v-if="!isEditingPrice" class="text-md flex items-center">
                                             <span class="font-bold">Precio:</span> {{ product.price }} soles
-                                            <button @click="isEditingPrice = true" class="ml-2 rounded-md border bg-gray-100 p-1 hover:bg-blue-500 hover:text-white">
-                                                <PencilIcon class="h-5 w-5" />
+                                            <button @click="isEditingPrice = true" class="ml-2 rounded-md border bg-gray-100 p-1 hover:bg-gray-200 hover:text-white">
+                                                <Icon name="my-icon:pencil-simple" size="16" />
                                             </button>
                                         </p>
                                         <div v-else>
@@ -141,10 +137,10 @@
 
                                     <!-- Edit Unit of Measure -->
                                     <div class="flex items-center">
-                                        <p v-if="!isEditingUnit" class="text-md">
+                                        <p v-if="!isEditingUnit" class="text-md flex items-center">
                                             <span class="font-bold">Unidad:</span> {{ product.unit_of_measure }}
-                                            <button @click="isEditingUnit = true" class="ml-2 rounded-md border bg-gray-100 p-1 hover:bg-blue-500 hover:text-white">
-                                                <PencilIcon class="h-5 w-5" />
+                                            <button @click="isEditingUnit = true" class="ml-2 rounded-md border bg-gray-100 p-1 hover:bg-gray-200 hover:text-white">
+                                                <Icon name="my-icon:pencil-simple" size="16" />
                                             </button>
                                         </p>
                                         <div v-else>
@@ -172,7 +168,7 @@
                                     <Disclosure as="div" class="mt-2" v-slot="{open}">
                                         <DisclosureButton class="flex w-full justify-between rounded-lg bg-gray-50 px-4 py-2 text-left text-sm font-medium text-gray-900 hover:bg-gray-200 focus:outline-none focus-visible:ring focus-visible:ring-gray-500/75">
                                             <span>{{ feature.name }}: {{ feature.value }}</span>
-                                            <ChevronUpIcon :class="{'rotate-180 transform': !open}" class="h-5 w-5 text-gray-500" />
+                                            <Icon name="my-icon:caret-right" size="15" :class="['mx-2 transform transition-transform duration-300', open ? 'rotate-90' : 'rotate-0']" />
                                         </DisclosureButton>
                                         <DisclosurePanel class="px-4 pb-2 pt-4 text-sm text-gray-500">{{ feature.description }}</DisclosurePanel>
                                     </Disclosure>
