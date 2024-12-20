@@ -25,7 +25,6 @@
         isLoading.value = true;
         try {
             await login(credentials.value, error);
-            router.push({name: "index"});
         } catch (err) {
             console.error(err);
         } finally {
