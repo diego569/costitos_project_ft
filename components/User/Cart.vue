@@ -129,8 +129,11 @@
         fetchSuppliersWithProducts();
     };
 
+    const isLoading = ref(false);
+
     const createQuotation = async () => {
         errorMessage.value = "";
+        isLoading.value = true;
 
         try {
             const response = await fetchWithAuth(apiurl("/user/carrito/createquotation"), "POST", quotationData.value);
@@ -150,6 +153,8 @@
             } else {
                 errorMessage.value = "Error al crear la cotización.";
             }
+        } finally {
+            isLoading.value = false;
         }
     };
 
@@ -196,13 +201,17 @@
     };
 
     const handleCreateQuotation = async () => {
+        isLoading.value = true;
         await createQuotation();
+        isLoading.value = false;
     };
+
     onMounted(() => {
         fetchSuppliersWithProducts();
     });
 </script>
 <template>
+    {{ carrito }}
     <div class="w-full transition-all duration-500 lg:block">
         <div class="flex items-center justify-between border-b p-2">
             <h2 class="text-base font-semibold">Carrito</h2>
@@ -315,4 +324,5 @@
             </template>
         </UiModal>
     </div>
+    <LoadingModal :show="isLoading" />
 </template>

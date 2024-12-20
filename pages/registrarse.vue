@@ -17,9 +17,17 @@
 
     const isSupplier = ref(false);
     const error = ref("");
+    const isLoading = ref(false);
 
-    const handleRegister = () => {
-        register(registerData.value, error);
+    const handleRegister = async () => {
+        isLoading.value = true;
+        try {
+            await register(registerData.value, error);
+        } catch (err) {
+            console.error("Error en el registro:", err);
+        } finally {
+            isLoading.value = false;
+        }
     };
 </script>
 
@@ -102,4 +110,5 @@
             </div>
         </div>
     </div>
+    <LoadingModal :show="isLoading" />
 </template>

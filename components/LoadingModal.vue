@@ -14,7 +14,6 @@
 <script setup>
     import {ref, watchEffect} from "vue";
 
-    // Props para controlar la visibilidad y las opciones del modal
     const props = defineProps({
         show: {
             type: Boolean,
@@ -28,7 +27,6 @@
 </script>
 
 <style scoped>
-    /* Animación personalizada para los puntos */
     .animate-bounce {
         animation: bounce 0.6s infinite;
     }
@@ -44,7 +42,6 @@
         }
     }
 
-    /* Añade retraso para los puntos */
     .delay-200 {
         animation-delay: 0.2s;
     }

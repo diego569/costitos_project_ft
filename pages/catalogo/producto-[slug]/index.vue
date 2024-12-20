@@ -9,9 +9,10 @@
 
     const route = useRoute();
     const productSlug = route.params.slug;
-    const categoryData = ref({category: null, subcategory: null});
 
+    const categoryData = ref({category: null, subcategory: null});
     const products = ref([]);
+    const newProducts = ref([]);
     const productId = ref(null);
 
     const fetchProductDetails = async () => {
@@ -28,6 +29,24 @@
                         cantidad: 1,
                     },
                 ];
+                newProducts.value = [
+                    {
+                        producto: {
+                            id: data.data.supplierProductId,
+                            productoId: data.data.productId,
+                            name: data.data.name,
+                            description: data.data.description,
+                            slug: data.data.slug,
+                            photo: data.data.photo,
+                            unitOfMeasure: data.data.unitOfMeasure,
+                            unitId: data.data.unitId,
+                            isAuthorized: data.data.isAuthorized,
+                            isLoading: false,
+                        },
+                        cantidad: 1,
+                    },
+                ];
+
                 productId.value = data.data.productId;
             } else {
                 console.warn("No se encontraron detalles del producto.");
@@ -36,6 +55,7 @@
             console.error("Error fetching product details:", error);
         }
     };
+
     const fetchProductCategoryAndSubcategory = async (productId) => {
         try {
             const categoryResponse = await fetchWithAuth(apiurl(`/guest/producto/${productId}/category-subcategory`), "GET");
@@ -44,20 +64,36 @@
             console.error("Error fetching category and subcategory data:", error);
         }
     };
+
     const incrementarCantidad = (product) => {
         product.cantidad += 1;
+
+        const simplifiedProduct = newProducts.value.find((p) => p.producto.id === product.supplierProductId);
+        if (simplifiedProduct) {
+            simplifiedProduct.cantidad = product.cantidad;
+        }
     };
 
     const decrementarCantidad = (product) => {
         if (product.cantidad > 1) {
             product.cantidad -= 1;
+
+            const simplifiedProduct = newProducts.value.find((p) => p.producto.id === product.supplierProductId);
+            if (simplifiedProduct) {
+                simplifiedProduct.cantidad = product.cantidad;
+            }
         }
     };
 
     const agregarAlCarrito = (product) => {
-        agregarProducto(product, {
-            unitOfMeasure: product.unitOfMeasure,
-        });
+        const newProduct = newProducts.value.find((p) => p.producto.id === product.supplierProductId);
+
+        if (newProduct) {
+            agregarProducto(newProduct.producto, {
+                unitOfMeasure: newProduct.producto.unitOfMeasure,
+                cantidad: product.cantidad,
+            });
+        }
     };
 
     onMounted(async () => {
