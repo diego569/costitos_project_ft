@@ -211,7 +211,6 @@
     });
 </script>
 <template>
-    {{ carrito }}
     <div class="w-full transition-all duration-500 lg:block">
         <div class="flex items-center justify-between border-b p-2">
             <h2 class="text-base font-semibold">Carrito</h2>
