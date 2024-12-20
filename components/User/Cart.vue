@@ -141,7 +141,6 @@
 
             fetchQuotationCount();
 
-            console.log("==> Finalización exitosa de createQuotation");
             return {quotationId, quotationNumber};
         } catch (error) {
             console.error("==> Error durante la creación de la cotización:", error);
@@ -151,8 +150,6 @@
             } else {
                 errorMessage.value = "Error al crear la cotización.";
             }
-        } finally {
-            isSubmitting = false;
         }
     };
 
@@ -167,24 +164,12 @@
                 quantity: item.cantidad,
             }));
 
-            console.log("Datos enviados al backend para agregar productos a la cotización:");
-            console.log({
-                quotationId,
-                products,
-            });
-
             const response = await fetchWithAuth(apiurl("/user/carrito/addproductstoquotation"), "POST", {
                 quotationId,
                 products,
             });
 
-            console.log("Respuesta del backend después de agregar productos a la cotización:");
-            console.log(response);
-
             const {quotationProducts} = response;
-
-            console.log("Productos añadidos a la cotización:");
-            console.table(quotationProducts);
 
             await addQuotationSupplierProducts(quotationId, quotationProducts);
         } catch (error) {
@@ -194,14 +179,7 @@
 
     const addQuotationSupplierProducts = async (quotationId, quotationProducts) => {
         try {
-            console.log("Preparando datos para enviar al backend...");
-
             const selectedSupplierIds = selectedSupplierList.value.map((supplier) => supplier.supplierId);
-
-            console.log("Productos de la cotización:");
-            console.table(quotationProducts);
-            console.log("IDs de proveedores seleccionados:");
-            console.table(selectedSupplierIds);
 
             const data = await fetchWithAuth(apiurl("/user/carrito/addquotationsupplierproducts"), "POST", {
                 quotationProducts,
@@ -209,8 +187,6 @@
                 quotationCount: supplierCount.value,
             });
 
-            console.log("Respuesta recibida del backend:");
-            console.table(data);
             vaciarCarritoUser();
             showMenu.value = false;
             window.location.href = `/cotizaciones/${quotationId}`;
@@ -221,7 +197,6 @@
 
     const handleCreateQuotation = async () => {
         await createQuotation();
-        console.log("si hace click en handleCreateQuotation");
     };
     onMounted(() => {
         fetchSuppliersWithProducts();
